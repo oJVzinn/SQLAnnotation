@@ -5,11 +5,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface PrimaryKey {
+@Target(ElementType.FIELD)
+public @interface Varchar {
 
-    boolean autoIncrement() default false;
-    boolean unique() default true;
+    int length() default 255;
 
 }

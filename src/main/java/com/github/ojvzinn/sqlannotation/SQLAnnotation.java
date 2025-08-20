@@ -11,6 +11,19 @@ public class SQLAnnotation {
     public static void scanTable(Class<?> classTable) {
         config.getSQLDataBase().scanTable(classTable);
     }
+
+    public static void dropTable(Class<?> classTable) {
+        config.getSQLDataBase().dropTable(classTable);
+    }
+
+    public static void checkColumn(Class<?> classTable, String columnField) {
+        config.getSQLDataBase().checkColumn(classTable, columnField);
+    }
+
+    public static <T> T findByKey(Class<?> classTable, Object key) {
+        return (T) config.getSQLDataBase().findByKey(classTable, key);
+    }
+
     public static void init(SQLConfigEntity entity) {
         entity.init();
         config = entity;

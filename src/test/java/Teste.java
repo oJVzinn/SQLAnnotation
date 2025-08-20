@@ -9,8 +9,12 @@ public class Teste {
     public void main() {
         MySQLEntity mySQL = new MySQLEntity("localhost", 3306, "server", "root", "");
         SQLConfigEntity config = new SQLConfigEntity(mySQL);
+        config.setLog(true);
         SQLAnnotation.init(config);
-        SQLAnnotation.scanTable(UsersTable.class);
+        SQLAnnotation.scanTable(User.class);
+
+        User user = SQLAnnotation.findByKey(User.class, 1);
+        System.out.println(user.getName());
     }
 
 }
