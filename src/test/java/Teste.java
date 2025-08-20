@@ -10,6 +10,7 @@ public class Teste {
         MySQLEntity mySQL = new MySQLEntity("localhost", 3306, "server", "root", "");
         SQLConfigEntity config = new SQLConfigEntity(mySQL);
         SQLAnnotation.init(config);
+        SQLAnnotation.scanTable(UsersTable.class);
     }
 
 }

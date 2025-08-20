@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 public class SQLConfigEntity {
 
     @NonNull
+    @Getter
     private SQL SQLDataBase;
 
     @Getter

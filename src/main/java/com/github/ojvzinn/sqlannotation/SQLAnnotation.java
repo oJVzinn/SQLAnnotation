@@ -8,6 +8,9 @@ public class SQLAnnotation {
     @Getter
     private static SQLConfigEntity config;
 
+    public static void scanTable(Class<?> classTable) {
+        config.getSQLDataBase().scanTable(classTable);
+    }
     public static void init(SQLConfigEntity entity) {
         entity.init();
         config = entity;
