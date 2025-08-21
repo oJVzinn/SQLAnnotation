@@ -73,6 +73,4 @@ public class MySQLEntity extends SQL {
         return sb.toString();
     }
 
-
-
 }
