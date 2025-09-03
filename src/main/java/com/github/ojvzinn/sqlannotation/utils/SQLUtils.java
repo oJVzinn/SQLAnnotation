@@ -2,7 +2,7 @@ package com.github.ojvzinn.sqlannotation.utils;
 
 import com.github.ojvzinn.sqlannotation.annotations.Column;
 import com.github.ojvzinn.sqlannotation.annotations.PrimaryKey;
-import com.github.ojvzinn.sqlannotation.annotations.Table;
+import com.github.ojvzinn.sqlannotation.annotations.Entity;
 import com.github.ojvzinn.sqlannotation.annotations.Varchar;
 import com.github.ojvzinn.sqlannotation.entity.ColumnEntity;
 import com.github.ojvzinn.sqlannotation.enums.ClassType;
@@ -20,8 +20,8 @@ public class SQLUtils {
 
     private static final SQLogger logger = new SQLogger("SQL");
 
-    public static Table checkIfClassValid(Class<?> tableCLass) {
-        Table tableName = tableCLass.getAnnotation(Table.class);
+    public static Entity checkIfClassValid(Class<?> tableCLass) {
+        Entity tableName = tableCLass.getAnnotation(Entity.class);
         if (tableName == null) {
             throw new RuntimeException("The table class needs to come with the @Table annotation");
         }

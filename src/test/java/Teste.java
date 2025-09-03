@@ -3,10 +3,9 @@ import com.github.ojvzinn.sqlannotation.entity.MySQLEntity;
 import com.github.ojvzinn.sqlannotation.entity.SQLConfigEntity;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Teste {
+
+    private final UserRepository repository = SQLAnnotation.loadRepository(UserRepository.class);
 
     @Test
     public void main() {
@@ -14,15 +13,15 @@ public class Teste {
         SQLConfigEntity config = new SQLConfigEntity(mySQL);
         config.setLog(true);
         SQLAnnotation.init(config);
-        SQLAnnotation.scanTable(User.class);
+        SQLAnnotation.scanEntity(User.class);
 
-        Map<String, Object> conditionals = new HashMap<>();
-        conditionals.put("ID", 1);
-        conditionals.put("name", "João Victor");
-        conditionals.put("age", 11);
-        User user = SQLAnnotation.findByConditionals(User.class, conditionals);
-        if (user == null) System.out.println("RETORNOU NULO");
-        if (user != null) System.out.println(user);
+        User user = repository.findByName("João Victor");
+        if (user == null) {
+            System.out.println("RETORNOU NULL");
+            return;
+        }
+
+        System.out.println(user.toString());
     }
 
 }

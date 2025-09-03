@@ -1,11 +1,8 @@
-import com.github.ojvzinn.sqlannotation.annotations.Column;
-import com.github.ojvzinn.sqlannotation.annotations.PrimaryKey;
-import com.github.ojvzinn.sqlannotation.annotations.Table;
-import com.github.ojvzinn.sqlannotation.annotations.Varchar;
+import com.github.ojvzinn.sqlannotation.annotations.*;
 import lombok.Getter;
 import lombok.ToString;
 
-@Table(name = "USERS")
+@Entity(name = "USERS")
 @Getter
 @ToString
 public class User {
@@ -26,8 +23,4 @@ public class User {
     @Varchar(length = 1)
     @Column(notNull = false)
     private String gender;
-
-    @Column
-    private String teste;
-
 }
