@@ -1,11 +1,8 @@
 package com.github.ojvzinn.sqlannotation.entity;
 
 import com.github.ojvzinn.sqlannotation.SQL;
-import lombok.NonNull;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 public class SQLiteEntity extends SQL {
 
@@ -19,7 +16,7 @@ public class SQLiteEntity extends SQL {
 
     }
 
-    public String makeSQLCreateTable(String table, Map<String, ColumnEntity> columns) {
+    public String makeSQLCreateTable(String table, LinkedHashMap<String, Object> columns) {
         return "v";
     }
 

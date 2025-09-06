@@ -4,12 +4,8 @@ import com.github.ojvzinn.sqlannotation.SQL;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.AllArgsConstructor;
-import lombok.NonNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 @AllArgsConstructor
 public class MySQLEntity extends SQL {
@@ -43,24 +39,25 @@ public class MySQLEntity extends SQL {
     }
 
     @Override
-    public String makeSQLCreateTable(String table, Map<String, ColumnEntity> columns) {
+    public String makeSQLCreateTable(String table, LinkedHashMap<String, Object> columns) {
         StringBuilder sb = new StringBuilder();
         sb.append("CREATE TABLE IF NOT EXISTS ").append(table).append(" (");
-        List<String> columnNames = new ArrayList<>(columns.keySet());
-        for (int i = 0; i < columnNames.size(); i++) {
-            ColumnEntity entity = columns.get(columnNames.get(i));
-            StringBuilder builder = new StringBuilder();
-            builder.append("`")
-                    .append(entity.getName())
-                    .append("`")
-                    .append(" ").append(entity.makeType())
-                    .append(entity.isPrimaryKey() ? " PRIMARY KEY" : "")
-                    .append(entity.isAutoIncrement() ? " AUTO_INCREMENT" : "")
-                    .append(entity.isNotNull() ? " NOT NULL" : "");
+        int i = 0;
+        for (String key : columns.keySet()) {
+            ColumnEntity entity = (ColumnEntity) columns.get(key);
+            String builder = "`" +
+                    entity.getName() +
+                    "`" +
+                    " " + entity.makeType() +
+                    (entity.isPrimaryKey() ? " PRIMARY KEY" : "") +
+                    (entity.isAutoIncrement() ? " AUTO_INCREMENT" : "") +
+                    (entity.isNotNull() ? " NOT NULL" : "");
             sb.append(builder);
-            if (i + 1 < columnNames.size()) {
+            if (i + 1 < columns.keySet().size()) {
                 sb.append(", ");
             }
+
+            i++;
         }
 
         return sb.append(")").toString();

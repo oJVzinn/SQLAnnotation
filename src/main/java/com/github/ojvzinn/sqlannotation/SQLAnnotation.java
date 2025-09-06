@@ -1,33 +1,27 @@
 package com.github.ojvzinn.sqlannotation;
 
 import com.github.ojvzinn.sqlannotation.entity.SQLConfigEntity;
+import com.github.ojvzinn.sqlannotation.interfaces.Repository;
+import com.github.ojvzinn.sqlannotation.processor.RepositoryProcessor;
 import lombok.Getter;
-
-import java.util.Map;
 
 public class SQLAnnotation {
 
     @Getter
     private static SQLConfigEntity config;
 
-    public static void scanTable(Class<?> classTable) {
-        config.getSQLDataBase().scanTable(classTable);
+    private static final RepositoryProcessor processor = new RepositoryProcessor();
+
+    public static <T extends Repository> T loadRepository(Class<T> repository) {
+        return repository.cast(processor.processRepository(repository));
     }
 
-    public static void dropTable(Class<?> classTable) {
-        config.getSQLDataBase().dropTable(classTable);
+    public static void scanEntity(Class<?> entity) {
+        config.getSQLDataBase().getCreateModule().scanEntity(entity);
     }
 
-    public static void checkColumn(Class<?> classTable, String columnField) {
-        config.getSQLDataBase().checkColumn(classTable, columnField);
-    }
-
-    public static <T> T findByConditionals(Class<?> classTable, Map<String, Object> conditonals) {
-        return (T) config.getSQLDataBase().findByConditionals(classTable, conditonals);
-    }
-
-    public static <T> T findByKey(Class<?> classTable, Object key) {
-        return (T) config.getSQLDataBase().findByKey(classTable, key);
+    public static void dropEntityTable(Class<?> entity) {
+        config.getSQLDataBase().getDropModule().dropTable(entity);
     }
 
     public static void init(SQLConfigEntity entity) {
