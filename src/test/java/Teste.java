@@ -16,11 +16,8 @@ public class Teste {
         SQLAnnotation.init(config);
         SQLAnnotation.scanTable(User.class);
 
-        Map<String, Object> conditionals = new HashMap<>();
-        conditionals.put("ID", 1);
-        conditionals.put("name", "João Victor");
-        conditionals.put("age", 11);
-        User user = SQLAnnotation.findByConditionals(User.class, conditionals);
+        User user = SQLAnnotation.findByKey(User.class, 1);
+
         if (user == null) System.out.println("RETORNOU NULO");
         if (user != null) System.out.println(user);
     }
