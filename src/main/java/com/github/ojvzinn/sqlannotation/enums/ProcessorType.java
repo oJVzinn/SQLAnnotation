@@ -2,6 +2,7 @@ package com.github.ojvzinn.sqlannotation.enums;
 
 import com.github.ojvzinn.sqlannotation.interfaces.Processor;
 import com.github.ojvzinn.sqlannotation.processor.ProcessorFind;
+import com.github.ojvzinn.sqlannotation.processor.ProcessorSave;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,7 +11,8 @@ import java.util.Arrays;
 @AllArgsConstructor
 public enum ProcessorType {
 
-    FIND_ENTITY("find", new ProcessorFind());
+    FIND_ENTITY("find", new ProcessorFind()),
+    SAVE_ENTITY("save", new ProcessorSave());
 
     private final String processorKey;
 

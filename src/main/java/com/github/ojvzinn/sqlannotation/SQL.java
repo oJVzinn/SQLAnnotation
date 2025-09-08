@@ -3,10 +3,7 @@ package com.github.ojvzinn.sqlannotation;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
 import com.github.ojvzinn.sqlannotation.entity.ColumnEntity;
 import com.github.ojvzinn.sqlannotation.entity.HikariEntity;
-import com.github.ojvzinn.sqlannotation.modules.CreateModule;
-import com.github.ojvzinn.sqlannotation.modules.DropModule;
-import com.github.ojvzinn.sqlannotation.modules.InsertModule;
-import com.github.ojvzinn.sqlannotation.modules.SelectModule;
+import com.github.ojvzinn.sqlannotation.modules.*;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
@@ -27,6 +24,7 @@ public abstract class SQL {
     private DropModule dropModule = new DropModule(this);
     private InsertModule insertModule = new InsertModule(this);
     private SelectModule selectModule = new SelectModule(this);
+    private UpdateModule updateModule = new UpdateModule(this);
 
     public void checkColumn(Class<?> entity, String fieldColumn) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);

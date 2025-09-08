@@ -8,5 +8,6 @@ public interface Repository<T> {
     T findByKey(Object key);
     JSONArray findAll();
     JSONArray findAllByConditionals(ConditionalEntity conditionals);
+    void save(T entity);
 
 }
