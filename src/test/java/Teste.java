@@ -1,9 +1,6 @@
 import com.github.ojvzinn.sqlannotation.SQLAnnotation;
-import com.github.ojvzinn.sqlannotation.entity.ConditionalEntity;
 import com.github.ojvzinn.sqlannotation.entity.MySQLEntity;
 import com.github.ojvzinn.sqlannotation.entity.SQLConfigEntity;
-import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
-import org.json.JSONArray;
 import org.junit.Test;
 
 public class Teste {
@@ -24,16 +21,14 @@ public class Teste {
             return;
         }
 
-        ConditionalEntity conditional = new ConditionalEntity(ConnectiveType.AND);
-        conditional.appendConditional("age", 12).appendConditional("gender", "M");
-        JSONArray users = repository.findAllByConditionals(conditional);
-        System.out.println(users);
+        System.out.println(user.toString());
+        user.setEmail("joaovictor17082006@gmail.com");
+        repository.save(user);
 
-        users = repository.findAll();
-        System.out.println(users);
+        user = repository.findByKey(1L);
+        System.out.println(user.toString());
 
-        users = repository.findAllByConditionalsAgeAndName(25, "Yan");
-        System.out.println(users);
+        repository.save(user);
     }
 
 }

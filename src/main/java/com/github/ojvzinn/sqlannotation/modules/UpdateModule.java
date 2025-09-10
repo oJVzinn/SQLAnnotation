@@ -2,6 +2,8 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
+import com.github.ojvzinn.sqlannotation.entity.ConditionalEntity;
+import com.github.ojvzinn.sqlannotation.enums.ClassType;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
 import java.lang.reflect.Field;
@@ -16,14 +18,17 @@ public class UpdateModule extends Module {
         super(instance);
     }
 
-    public void update(Object table) {
-        Entity tableName = SQLUtils.checkIfClassValid(table.getClass());
-        List<Field> columnsFields = SQLUtils.listFieldColumns(table.getClass());
+    public void update(Object entity, ConditionalEntity conditionals) {
+        Entity tableName = SQLUtils.checkIfClassValid(entity.getClass());
+        List<Field> columnsFields = SQLUtils.listFieldColumns(entity.getClass());
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < columnsFields.size(); i++) {
             Field field = columnsFields.get(i);
+            field.setAccessible(true);
             try {
-                sb.append(field.getName()).append(" = ").append(field.get(table));
+                Object value = field.get(entity);
+                ClassType type = ClassType.getType(value.getClass());
+                sb.append(field.getName()).append(" = ").append(type == ClassType.VARCHAR || type == ClassType.TEXT ? ("'" + value + "'") : value);
             } catch (Exception e)  {
                 throw new RuntimeException(e);
             }
@@ -31,11 +36,21 @@ public class UpdateModule extends Module {
             if (i + 1 < columnsFields.size()) sb.append(", ");
         }
 
+        String SQL = "UPDATE " + tableName.name() + " SET " + sb + " WHERE" + conditionals.build();
         try (Connection connection = getInstance().getDataSource().getConnection()) {
-            PreparedStatement statement = connection.prepareStatement("UPDATE " + tableName.name() + " SET (" + sb.);
+            PreparedStatement statement = connection.prepareStatement(SQL);
+            int i = 1;
+            for (String key : conditionals.getConditions().keySet()) {
+                statement.setObject(i, conditionals.getConditions().get(key));
+                i++;
+            }
+
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+
+        SQLUtils.loggingQuery(SQL);
     }
 
 }

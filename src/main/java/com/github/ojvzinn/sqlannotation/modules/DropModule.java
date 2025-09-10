@@ -14,7 +14,7 @@ public class DropModule extends Module {
         super(instance);
     }
 
-    public void dropTable(Class<?> entity) {
+    public void drop(Class<?> entity) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             Statement statement = connection.createStatement();
@@ -25,5 +25,18 @@ public class DropModule extends Module {
             throw new RuntimeException(e);
         }
     }
+
+    public void truncate(Class<?> entity) {
+        Entity tableName = SQLUtils.checkIfClassValid(entity);
+        try (Connection connection = getInstance().getDataSource().getConnection()) {
+            Statement statement = connection.createStatement();
+            String sql = "TRUNCATE TABLE " + tableName.name();
+            statement.execute(sql);
+            SQLUtils.loggingQuery(sql);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }

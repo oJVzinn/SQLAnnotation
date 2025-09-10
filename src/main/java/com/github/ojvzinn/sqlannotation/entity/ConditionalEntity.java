@@ -7,6 +7,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 
+import java.util.Set;
+
 @RequiredArgsConstructor
 @Getter
 public class ConditionalEntity {
@@ -19,6 +21,19 @@ public class ConditionalEntity {
     public ConditionalEntity appendConditional(String column, Object value) {
         conditions.put(column + " = ?", value);
         return this;
+    }
+
+    public String build() {
+        StringBuilder sql = new StringBuilder();
+        Set<String> keys = getConditions().keySet();
+        int i = 0;
+        for (String conditional : getConditions().keySet()) {
+            sql.append(" ").append(conditional);
+            if (i + 1 != keys.size()) sql.append(" ").append(getType().name());
+            i++;
+        }
+
+        return sql.toString();
     }
 
 }

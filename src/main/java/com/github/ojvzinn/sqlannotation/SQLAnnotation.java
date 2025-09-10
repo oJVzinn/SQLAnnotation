@@ -20,8 +20,8 @@ public class SQLAnnotation {
         config.getSQLDataBase().getCreateModule().scanEntity(entity);
     }
 
-    public static void dropEntityTable(Class<?> entity) {
-        config.getSQLDataBase().getDropModule().dropTable(entity);
+    public static void drop(Class<?> entity) {
+        config.getSQLDataBase().getDropModule().drop(entity);
     }
 
     public static void init(SQLConfigEntity entity) {

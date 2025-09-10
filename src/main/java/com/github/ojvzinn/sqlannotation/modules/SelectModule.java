@@ -9,7 +9,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.sql.*;
-import java.util.Set;
 
 public class SelectModule extends Module {
 
@@ -58,19 +57,11 @@ public class SelectModule extends Module {
     public JSONArray select(String table, ConditionalEntity conditionals) {
         JSONArray result;
         StringBuilder sql = new StringBuilder();
-        Set<String> keys = conditionals.getConditions().keySet();
-        sql.append("SELECT * FROM ").append(table).append(" WHERE");
-        int i = 0;
-        for (String conditional : keys) {
-            sql.append(" ").append(conditional);
-            if (i + 1 != keys.size()) sql.append(" ").append(conditionals.getType().name());
-            i++;
-        }
-
+        sql.append("SELECT * FROM ").append(table).append(" WHERE").append(conditionals.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql.toString());
-            i = 1;
-            for (String key : keys) {
+            int i = 1;
+            for (String key : conditionals.getConditions().keySet()) {
                 statement.setObject(i, conditionals.getConditions().get(key));
                 i++;
             }
