@@ -21,7 +21,7 @@ public abstract class SQL {
 
     private HikariDataSource dataSource = null;
     private CreateModule createModule = new CreateModule(this);
-    private DropModule dropModule = new DropModule(this);
+    private DeleteModule deleteModule = new DeleteModule(this);
     private InsertModule insertModule = new InsertModule(this);
     private SelectModule selectModule = new SelectModule(this);
     private UpdateModule updateModule = new UpdateModule(this);

@@ -21,7 +21,7 @@ public class SQLAnnotation {
     }
 
     public static void drop(Class<?> entity) {
-        config.getSQLDataBase().getDropModule().drop(entity);
+        config.getSQLDataBase().getDeleteModule().drop(entity);
     }
 
     public static void init(SQLConfigEntity entity) {

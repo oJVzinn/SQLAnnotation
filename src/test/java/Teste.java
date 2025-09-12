@@ -14,21 +14,6 @@ public class Teste {
         config.setLog(true);
         SQLAnnotation.init(config);
         SQLAnnotation.scanEntity(User.class);
-
-        User user = repository.findByKey(1L);
-        if (user == null) {
-            System.out.println("RETORNOU NULL");
-            return;
-        }
-
-        System.out.println(user.toString());
-        user.setEmail("joaovictor17082006@gmail.com");
-        repository.save(user);
-
-        user = repository.findByKey(1L);
-        System.out.println(user.toString());
-
-        repository.save(user);
     }
 
 }
