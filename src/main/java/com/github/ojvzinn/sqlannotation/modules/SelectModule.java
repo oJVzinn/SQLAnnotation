@@ -3,6 +3,7 @@ package com.github.ojvzinn.sqlannotation.modules;
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
 import com.github.ojvzinn.sqlannotation.entity.ConditionalEntity;
+import com.github.ojvzinn.sqlannotation.entity.SQLTimerEntity;
 import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 import org.json.JSONArray;
@@ -19,10 +20,7 @@ public class SelectModule extends Module {
     public <T> T findByConditionals(Class<T> entity, ConditionalEntity conditionals) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
         JSONArray resultAll = select(tableName.name(), conditionals);
-        if (resultAll.isEmpty()) {
-            return null;
-        }
-
+        if (resultAll.isEmpty()) return null;
         return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0));
     }
 
@@ -30,7 +28,6 @@ public class SelectModule extends Module {
         ConditionalEntity conditional = new ConditionalEntity(ConnectiveType.NONE);
         conditional.appendConditional(SQLUtils.findPrimaryKey(entity).getName(), key);
         JSONArray resultAll = findResult(entity, conditional);
-
         if (resultAll.isEmpty()) return null;
         return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0));
     }
@@ -41,14 +38,13 @@ public class SelectModule extends Module {
 
     public JSONArray findAll(Class<?> entity) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
+        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
         JSONArray result;
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT * FROM ").append(tableName.name());
+        StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(tableName.name());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(sql.toString());
-            result = selectQuery(sql.toString(), statement);
+            result = selectQuery(sql.toString(), connection.prepareStatement(sql.toString()), timer);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("An error occurred while fetching all records", e);
         }
 
         return result;
@@ -56,8 +52,8 @@ public class SelectModule extends Module {
 
     public JSONArray select(String table, ConditionalEntity conditionals) {
         JSONArray result;
-        StringBuilder sql = new StringBuilder();
-        sql.append("SELECT * FROM ").append(table).append(" WHERE").append(conditionals.build());
+        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(table).append(" WHERE").append(conditionals.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql.toString());
             int i = 1;
@@ -66,15 +62,15 @@ public class SelectModule extends Module {
                 i++;
             }
 
-            result = selectQuery(sql.toString(), statement);
+            result = selectQuery(sql.toString(), statement, timer);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("An error occurred while fetching a record", e);
         }
 
         return result;
     }
 
-    private JSONArray selectQuery(String sql, PreparedStatement statement) {
+    private JSONArray selectQuery(String sql, PreparedStatement statement, SQLTimerEntity timer) {
         JSONArray result = new JSONArray();
         try (ResultSet resultSet = statement.executeQuery()) {
             ResultSetMetaData metaData = resultSet.getMetaData();
@@ -88,10 +84,11 @@ public class SelectModule extends Module {
                 result.put(row);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("An error occurred while fetching all records", e);
         }
 
-        SQLUtils.loggingQuery(sql);
+        SQLUtils.loggingQuery(timer, sql);
         return result;
     }
+
 }

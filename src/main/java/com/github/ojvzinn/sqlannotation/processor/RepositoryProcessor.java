@@ -15,8 +15,14 @@ public class RepositoryProcessor {
                 repository.getClassLoader(),
                 new Class<?>[]{repository},
                 (proxy, method, methodArgs) -> {
-                    ProcessorType processorType = ProcessorType.findByKey(method.getName());
-                    if (processorType != null) return processorType.getProcessor().process(method, methodArgs, finalEntity);
+                    try {
+                        ProcessorType processorType = ProcessorType.findByKey(method.getName());
+                        if (processorType != null)
+                            return processorType.getProcessor().process(method, methodArgs, finalEntity);
+                    } catch (Exception e) {
+                        throw new RuntimeException("An error occurred while processing the repository function", e);
+                    }
+
                     return null;
                 }
         );

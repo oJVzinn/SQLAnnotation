@@ -5,6 +5,7 @@ import com.github.ojvzinn.sqlannotation.annotations.Entity;
 import com.github.ojvzinn.sqlannotation.annotations.PrimaryKey;
 import com.github.ojvzinn.sqlannotation.annotations.Varchar;
 import com.github.ojvzinn.sqlannotation.entity.ColumnEntity;
+import com.github.ojvzinn.sqlannotation.entity.SQLTimerEntity;
 import com.github.ojvzinn.sqlannotation.enums.ClassType;
 import com.github.ojvzinn.sqlannotation.logger.SQLogger;
 import org.json.JSONObject;
@@ -23,7 +24,7 @@ public class SQLUtils {
     public static Entity checkIfClassValid(Class<?> entity) {
         Entity tableName = entity.getAnnotation(Entity.class);
         if (tableName == null) {
-            throw new RuntimeException("The table class needs to come with the @Table annotation");
+            throw new RuntimeException("The table class needs to come with the @Entity annotation");
         }
 
         return tableName;
@@ -84,15 +85,14 @@ public class SQLUtils {
                 field.setAccessible(true);
                 field.set(instance, values.get(field.getName()));
             }
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
-                 IllegalAccessException e) {
-            throw new RuntimeException(e);
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("An error occurred while loading your entity class. Report this to developer \"oJVzinn\"", e);
         }
 
         return instance;
     }
 
-    public static void loggingQuery(String sql) {
-        logger.info("QUERY EXECUTED: " + sql);
+    public static void loggingQuery(SQLTimerEntity timer, String sql) {
+        logger.info("QUERY EXECUTED: " + sql + ". Was executed in " + timer.stop() + " seconds.");
     }
 }

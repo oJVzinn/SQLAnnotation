@@ -21,7 +21,7 @@ public class SQLiteEntity extends SQL {
     }
 
     @Override
-    public String makeSQLCheckColumn(String table, String column, String type) {
+    public String makeSQLCheckColumn(String table, LinkedHashMap<String, Object> column) {
         return "";
     }
 

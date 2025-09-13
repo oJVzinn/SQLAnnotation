@@ -3,12 +3,12 @@ package com.github.ojvzinn.sqlannotation.modules;
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
 import com.github.ojvzinn.sqlannotation.entity.ColumnEntity;
+import com.github.ojvzinn.sqlannotation.entity.SQLTimerEntity;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.LinkedHashMap;
 
 public class CreateModule extends Module {
@@ -21,6 +21,7 @@ public class CreateModule extends Module {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
         LinkedHashMap<String, Object> columns = new LinkedHashMap<>();
         boolean containsPrimaryKey = false;
+        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
         for (Field field : SQLUtils.listFieldColumns(entity)) {
             ColumnEntity column = SQLUtils.makeColumn(field);
             if (column.isPrimaryKey()) {
@@ -38,14 +39,28 @@ public class CreateModule extends Module {
             throw new RuntimeException("The table must contain a primary key");
         }
 
+        String sql = getInstance().makeSQLCreateTable(tableName.name(), columns);
         try (Connection connection = getInstance().getDataSource().getConnection()) {
-            Statement statement = connection.createStatement();
-            String sql = getInstance().makeSQLCreateTable(tableName.name(), columns);
-            statement.execute(sql);
-            SQLUtils.loggingQuery(sql);
+            connection.createStatement().execute(sql);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("An error occurred while scanning the entity", e);
         }
+
+        SQLUtils.loggingQuery(timer, sql);
+        checkColumns(entity, columns);
+    }
+
+    public void checkColumns(Class<?> entity, LinkedHashMap<String, Object> columns) {
+        Entity tableName = SQLUtils.checkIfClassValid(entity);
+        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        String sql = getInstance().makeSQLCheckColumn(tableName.name(), columns);
+        try (Connection connection = getInstance().getDataSource().getConnection()) {
+            connection.createStatement().execute(sql);
+        } catch (SQLException e) {
+            throw new RuntimeException("An error occurred while loading columns", e);
+        }
+
+        SQLUtils.loggingQuery(timer, sql);
     }
 
 }

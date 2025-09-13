@@ -12,4 +12,5 @@ public class SQLogger extends Logger {
         addHandler(handler);
         setUseParentHandlers(false);
     }
+
 }

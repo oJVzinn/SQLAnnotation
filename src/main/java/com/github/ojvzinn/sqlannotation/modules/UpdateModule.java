@@ -3,6 +3,7 @@ package com.github.ojvzinn.sqlannotation.modules;
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
 import com.github.ojvzinn.sqlannotation.entity.ConditionalEntity;
+import com.github.ojvzinn.sqlannotation.entity.SQLTimerEntity;
 import com.github.ojvzinn.sqlannotation.enums.ClassType;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
@@ -20,23 +21,8 @@ public class UpdateModule extends Module {
 
     public void update(Object entity, ConditionalEntity conditionals) {
         Entity tableName = SQLUtils.checkIfClassValid(entity.getClass());
-        List<Field> columnsFields = SQLUtils.listFieldColumns(entity.getClass());
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < columnsFields.size(); i++) {
-            Field field = columnsFields.get(i);
-            field.setAccessible(true);
-            try {
-                Object value = field.get(entity);
-                ClassType type = ClassType.getType(value.getClass());
-                sb.append(field.getName()).append(" = ").append(type == ClassType.VARCHAR || type == ClassType.TEXT ? ("'" + value + "'") : value);
-            } catch (Exception e)  {
-                throw new RuntimeException(e);
-            }
-
-            if (i + 1 < columnsFields.size()) sb.append(", ");
-        }
-
-        String SQL = "UPDATE " + tableName.name() + " SET " + sb + " WHERE" + conditionals.build();
+        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        String SQL = "UPDATE " + tableName.name() + " SET " + makeColumns(entity) + " WHERE" + conditionals.build();
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQL);
             int i = 1;
@@ -47,10 +33,29 @@ public class UpdateModule extends Module {
 
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("An error occurred while updating the entity", e);
         }
 
-        SQLUtils.loggingQuery(SQL);
+        SQLUtils.loggingQuery(timer, SQL);
     }
 
+    private String makeColumns(Object entity) {
+        List<Field> columnsFields = SQLUtils.listFieldColumns(entity.getClass());
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < columnsFields.size(); i++) {
+            Field field = columnsFields.get(i);
+            field.setAccessible(true);
+            try {
+                Object value = field.get(entity);
+                ClassType type = ClassType.getType(value.getClass());
+                sb.append(field.getName()).append(" = ").append(type == ClassType.VARCHAR || type == ClassType.TEXT ? ("'" + value + "'") : value);
+            } catch (Exception e)  {
+                throw new RuntimeException("An error occurred while loading columns", e);
+            }
+
+            if (i + 1 < columnsFields.size()) sb.append(", ");
+        }
+
+        return sb.toString();
+    }
 }

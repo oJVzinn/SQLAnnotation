@@ -27,7 +27,7 @@ public class ProcessorFind implements Processor {
 
                 ConditionalEntity conditional = new ConditionalEntity(ConnectiveType.NONE);
                 conditional.appendConditional(name, args[0]);
-                return SQLAnnotation.getConfig().getSQLDataBase().getSelectModule().findResult(entity, conditional);
+                return SQLAnnotation.getConfig().getSQLDataBase().getSelectModule().findByConditionals(entity, conditional);
             }
 
             case ALL: {
@@ -42,10 +42,7 @@ public class ProcessorFind implements Processor {
                 String name = type.split(findType.getType())[1];
                 String[] conditionals = name.split("And");
                 ConditionalEntity conditional = new ConditionalEntity(ConnectiveType.AND);
-                for (int i = 0; i < conditionals.length; i++) {
-                    conditional.appendConditional(conditionals[i], args[i]);
-                }
-
+                for (int i = 0; i < conditionals.length; i++) conditional.appendConditional(conditionals[i], args[i]);
                 return SQLAnnotation.getConfig().getSQLDataBase().getSelectModule().findResult(entity, conditional);
             }
         }

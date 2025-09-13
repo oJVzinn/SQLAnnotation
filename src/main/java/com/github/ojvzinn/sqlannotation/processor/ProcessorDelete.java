@@ -27,21 +27,25 @@ public class ProcessorDelete implements Processor {
             case BY_KEY: {
                 String name = type.split(deleteType.getType())[1];
                 if (name.equals("Key")) {
-                    return SQLAnnotation.getConfig().getSQLDataBase().getSelectModule().findByKey(entity, args[0]);
+                    SQLAnnotation.getConfig().getSQLDataBase().getDeleteModule().deleteByKey(entity, args[0]);
+                    return null;
                 }
 
                 ConditionalEntity conditional = new ConditionalEntity(ConnectiveType.NONE);
                 conditional.appendConditional(name, args[0]);
-                return SQLAnnotation.getConfig().getSQLDataBase().getSelectModule().findResult(entity, conditional);
+                SQLAnnotation.getConfig().getSQLDataBase().getDeleteModule().deleteByConditionals(entity, conditional);
+                return null;
             }
 
             case ALL: {
-                return SQLAnnotation.getConfig().getSQLDataBase().getSelectModule().findAll(entity);
+                SQLAnnotation.getConfig().getSQLDataBase().getDeleteModule().deleteAll(entity);
+                return null;
             }
 
             case BY_CONDITIONALS: {
                 if (args[0] instanceof ConditionalEntity) {
-                    return SQLAnnotation.getConfig().getSQLDataBase().getSelectModule().findResult(entity, (ConditionalEntity) args[0]);
+                    SQLAnnotation.getConfig().getSQLDataBase().getDeleteModule().deleteByConditionals(entity, (ConditionalEntity) args[0]);
+                    return null;
                 }
 
                 String name = type.split(deleteType.getType())[1];
@@ -51,7 +55,8 @@ public class ProcessorDelete implements Processor {
                     conditional.appendConditional(conditionals[i], args[i]);
                 }
 
-                return SQLAnnotation.getConfig().getSQLDataBase().getSelectModule().findResult(entity, conditional);
+                SQLAnnotation.getConfig().getSQLDataBase().getDeleteModule().deleteByConditionals(entity, conditional);
+                return null;
             }
         }
 

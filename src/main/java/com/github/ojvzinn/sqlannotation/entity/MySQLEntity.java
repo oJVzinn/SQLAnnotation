@@ -64,9 +64,27 @@ public class MySQLEntity extends SQL {
     }
 
     @Override
-    public String makeSQLCheckColumn(String table, String column, String type) {
+    public String makeSQLCheckColumn(String table, LinkedHashMap<String, Object> columns) {
         StringBuilder sb = new StringBuilder();
-        sb.append("ALTER TABLE ").append(table).append(" ADD COLUMN IF NOT EXISTS ").append(column).append(" ").append(type);
+        sb.append("ALTER TABLE ").append(table);
+        int i = 0;
+        for (String key : columns.keySet()) {
+            ColumnEntity entity = (ColumnEntity) columns.get(key);
+            String builder = "`" +
+                    entity.getName() +
+                    "`" +
+                    " " + entity.makeType() +
+                    (entity.isPrimaryKey() ? " PRIMARY KEY" : "") +
+                    (entity.isAutoIncrement() ? " AUTO_INCREMENT" : "") +
+                    (entity.isNotNull() ? " NOT NULL" : "");
+            sb.append(" ADD COLUMN IF NOT EXISTS ").append(builder);
+            if (i + 1 < columns.keySet().size()) {
+                sb.append(", ");
+            }
+
+            i++;
+        }
+
         return sb.toString();
     }
 

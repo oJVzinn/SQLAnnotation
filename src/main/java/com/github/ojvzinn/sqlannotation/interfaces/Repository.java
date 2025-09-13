@@ -10,7 +10,7 @@ public interface Repository<T> {
     JSONArray findAllByConditionals(ConditionalEntity conditionals);
     void save(T entity);
     void deleteRows();
-    void deleteByKey(T entity);
+    void deleteByKey(Object key);
     void deleteAllByConditionals(ConditionalEntity conditionals);
     void deleteAll();
 
