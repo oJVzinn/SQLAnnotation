@@ -1,0 +1,59 @@
+name: Publish Controller
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      base_version:
+        description: 'Base version like v1.0.0 (used when running manually)'
+        required: false
+        default: 'v0.0.0'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+          cache: 'maven'
+
+      - name: Compute version (tag + run number)
+        id: ver
+        shell: bash
+        run: |
+          BASE="${GITHUB_REF_NAME}"
+          if [[ -z "$BASE" ]]; then BASE="${{ github.event.inputs.base_version }}"; fi
+          if [[ -z "$BASE" ]]; then BASE="v0.0.0"; fi
+          VERSION="${BASE}-${GITHUB_RUN_NUMBER}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and Publish to GitHub Packages
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
+          mvn clean deploy -DskipTests -B \
+            -Dregistry=https://maven.pkg.github.com/${{ github.repository_owner }}/$(basename ${{ github.repository }}) \
+            -Dtoken=${GITHUB_TOKEN}
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: controller-${{ steps.ver.outputs.version }}
+          path: target/*-${{ steps.ver.outputs.version }}.jar
