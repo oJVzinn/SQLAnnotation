@@ -2,8 +2,8 @@ name: Publish Controller
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - 'master'
   workflow_dispatch:
     inputs:
       base_version:
