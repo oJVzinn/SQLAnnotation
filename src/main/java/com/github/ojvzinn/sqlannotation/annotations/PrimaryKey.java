@@ -10,6 +10,5 @@ import java.lang.annotation.Target;
 public @interface PrimaryKey {
 
     boolean autoIncrement() default false;
-    boolean unique() default true;
 
 }

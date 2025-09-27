@@ -16,17 +16,17 @@ public class User {
     @PrimaryKey(autoIncrement = true)
     private Long id;
 
-    @Column
+    @Column(notNull = true, unique = true)
     private String name;
 
-    @Column
+    @Column(notNull = true)
     private Integer age;
 
-    @Column
+    @Column(notNull = true)
     private String email;
 
     @Varchar(length = 1)
-    @Column(notNull = false)
+    @Column(notNull = true)
     private String gender;
 
 }
