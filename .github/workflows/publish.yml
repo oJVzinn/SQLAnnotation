@@ -31,14 +31,14 @@ jobs:
           java-version: '8'
           cache: 'maven'
 
-      - name: Compute version (tag + run number)
+      - name: Read version (input > pom)
         id: ver
-        shell: bash
         run: |
-          BASE="${GITHUB_REF_NAME}"
-          if [[ -z "$BASE" ]]; then BASE="${{ github.event.inputs.base_version }}"; fi
-          if [[ -z "$BASE" ]]; then BASE="v0.0.0"; fi
-          VERSION="${BASE}-${GITHUB_RUN_NUMBER}"
+          if [[ -n "${{ github.event.inputs.base_version }}" ]]; then
+            VERSION="${{ github.event.inputs.base_version }}"
+          else
+            VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Build and Publish to GitHub Packages
