@@ -93,6 +93,7 @@ public class SQLUtils {
     }
 
     public static void loggingQuery(SQLTimerEntity timer, String sql) {
-        logger.info("QUERY EXECUTED: " + sql + ". Was executed in " + timer.stop() + " seconds.");
+        logger.info("QUERY EXECUTED: " + sql + ". Was executed in " + timer.stop() + " ms.");
     }
+
 }
