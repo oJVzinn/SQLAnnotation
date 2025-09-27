@@ -158,4 +158,4 @@ Caso queira modificar ou compilar manualmente:
 
 ---
 
-Desenvolvido com ❤️ por [oJVzinn](https://github.com/oJVzinn) && [oNyell](https://github.com/oNyell)
+Desenvolvido com ❤️ por [oJVzinn](https://github.com/oJVzinn)
