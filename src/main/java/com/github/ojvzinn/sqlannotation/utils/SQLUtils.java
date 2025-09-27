@@ -46,11 +46,9 @@ public class SQLUtils {
             throw new RuntimeException("Invalid varchar size value");
         }
 
-        if (primaryKey != null) {
-            autoIncrement = primaryKey.autoIncrement();
-        }
+        if (primaryKey != null) autoIncrement = primaryKey.autoIncrement();
 
-        return new ColumnEntity(columnName, type.getType(), column.notNull(), autoIncrement, primaryKey != null, size);
+        return new ColumnEntity(columnName, type.getType(), column.notNull(), autoIncrement, primaryKey != null, column.unique(), size);
     }
 
     public static LinkedList<Field> listFieldColumns(Class<?> entity) {

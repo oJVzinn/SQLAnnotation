@@ -51,6 +51,7 @@ public class MySQLEntity extends SQL {
                     " " + entity.makeType() +
                     (entity.isPrimaryKey() ? " PRIMARY KEY" : "") +
                     (entity.isAutoIncrement() ? " AUTO_INCREMENT" : "") +
+                    (entity.isUnique() ? " UNIQUE" : "") +
                     (entity.isNotNull() ? " NOT NULL" : "");
             sb.append(builder);
             if (i + 1 < columns.keySet().size()) {
@@ -76,6 +77,7 @@ public class MySQLEntity extends SQL {
                     " " + entity.makeType() +
                     (entity.isPrimaryKey() ? " PRIMARY KEY" : "") +
                     (entity.isAutoIncrement() ? " AUTO_INCREMENT" : "") +
+                    (entity.isUnique() ? " UNIQUE" : "") +(entity.isUnique() ? " UNIQUE" : "") +
                     (entity.isNotNull() ? " NOT NULL" : "");
             sb.append(" ADD COLUMN IF NOT EXISTS ").append(builder);
             if (i + 1 < columns.keySet().size()) {

@@ -12,6 +12,7 @@ public class ColumnEntity {
     private boolean notNull;
     private boolean autoIncrement;
     private boolean primaryKey;
+    private boolean unique;
     private int length;
 
     public boolean isVarchar() {
