@@ -2,9 +2,7 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.entity.ConditionalEntity;
-import com.github.ojvzinn.sqlannotation.entity.SQLTimerEntity;
-import com.github.ojvzinn.sqlannotation.enums.ClassType;
+import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
 import java.lang.reflect.Field;
@@ -21,7 +19,7 @@ public class InsertModule extends Module {
 
     public void insert(Object entity) {
         Entity tableName = SQLUtils.checkIfClassValid(entity.getClass());
-        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         StringBuilder columns = new StringBuilder();
         StringBuilder valuesReplace = new StringBuilder();
         LinkedList<Object> values = loadValues(columns, valuesReplace, entity);

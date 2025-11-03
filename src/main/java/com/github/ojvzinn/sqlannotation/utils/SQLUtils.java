@@ -4,8 +4,8 @@ import com.github.ojvzinn.sqlannotation.annotations.Column;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
 import com.github.ojvzinn.sqlannotation.annotations.PrimaryKey;
 import com.github.ojvzinn.sqlannotation.annotations.Varchar;
-import com.github.ojvzinn.sqlannotation.entity.ColumnEntity;
-import com.github.ojvzinn.sqlannotation.entity.SQLTimerEntity;
+import com.github.ojvzinn.sqlannotation.model.ColumnModel;
+import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ClassType;
 import com.github.ojvzinn.sqlannotation.logger.SQLogger;
 import org.json.JSONObject;
@@ -30,7 +30,7 @@ public class SQLUtils {
         return tableName;
     }
 
-    public static ColumnEntity makeColumn(Field field) {
+    public static ColumnModel makeColumn(Field field) {
         Column column = field.getAnnotation(Column.class);
         PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);
         Varchar varchar = field.getAnnotation(Varchar.class);
@@ -48,7 +48,7 @@ public class SQLUtils {
 
         if (primaryKey != null) autoIncrement = primaryKey.autoIncrement();
 
-        return new ColumnEntity(columnName, type.getType(), column.notNull(), autoIncrement, primaryKey != null, column.unique(), size);
+        return new ColumnModel(columnName, type.getType(), column.notNull(), autoIncrement, primaryKey != null, column.unique(), size);
     }
 
     public static LinkedList<Field> listFieldColumns(Class<?> entity) {
@@ -90,7 +90,7 @@ public class SQLUtils {
         return instance;
     }
 
-    public static void loggingQuery(SQLTimerEntity timer, String sql) {
+    public static void loggingQuery(SQLTimerModel timer, String sql) {
         logger.info("QUERY EXECUTED: " + sql + ". Was executed in " + timer.stop() + " ms.");
     }
 

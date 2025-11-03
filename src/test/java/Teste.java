@@ -1,6 +1,6 @@
 import com.github.ojvzinn.sqlannotation.SQLAnnotation;
-import com.github.ojvzinn.sqlannotation.entity.MySQLEntity;
-import com.github.ojvzinn.sqlannotation.entity.SQLConfigEntity;
+import com.github.ojvzinn.sqlannotation.model.MySQLModel;
+import com.github.ojvzinn.sqlannotation.model.SQLConfigModel;
 import org.junit.Test;
 
 public class Teste {
@@ -9,8 +9,8 @@ public class Teste {
 
     @Test
     public void main() {
-        MySQLEntity mySQL = new MySQLEntity("localhost", 3306, "server", "root", "");
-        SQLConfigEntity config = new SQLConfigEntity(mySQL);
+        MySQLModel mySQL = new MySQLModel("localhost", 3306, "server", "root", "");
+        SQLConfigModel config = new SQLConfigModel(mySQL);
         config.setLog(true);
         SQLAnnotation.init(config);
         SQLAnnotation.scanEntity(User.class);

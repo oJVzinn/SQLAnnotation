@@ -2,8 +2,8 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.entity.ConditionalEntity;
-import com.github.ojvzinn.sqlannotation.entity.SQLTimerEntity;
+import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
+import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 import org.json.JSONArray;
@@ -17,7 +17,7 @@ public class SelectModule extends Module {
         super(instance);
     }
 
-    public <T> T findByConditionals(Class<T> entity, ConditionalEntity conditionals) {
+    public <T> T findByConditionals(Class<T> entity, ConditionalModel conditionals) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
         JSONArray resultAll = select(tableName.name(), conditionals);
         if (resultAll.isEmpty()) return null;
@@ -25,20 +25,20 @@ public class SelectModule extends Module {
     }
 
     public <T> T findByKey(Class<T> entity, Object key) {
-        ConditionalEntity conditional = new ConditionalEntity(ConnectiveType.NONE);
+        ConditionalModel conditional = new ConditionalModel(ConnectiveType.NONE);
         conditional.appendConditional(SQLUtils.findPrimaryKey(entity).getName(), key);
         JSONArray resultAll = findResult(entity, conditional);
         if (resultAll.isEmpty()) return null;
         return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0));
     }
 
-    public JSONArray findResult(Class<?> entity, ConditionalEntity conditionals) {
+    public JSONArray findResult(Class<?> entity, ConditionalModel conditionals) {
         return select(SQLUtils.checkIfClassValid(entity).name(), conditionals);
     }
 
     public JSONArray findAll(Class<?> entity) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
-        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         JSONArray result;
         StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(tableName.name());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
@@ -50,9 +50,9 @@ public class SelectModule extends Module {
         return result;
     }
 
-    public JSONArray select(String table, ConditionalEntity conditionals) {
+    public JSONArray select(String table, ConditionalModel conditionals) {
         JSONArray result;
-        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(table).append(" WHERE").append(conditionals.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql.toString());
@@ -70,7 +70,7 @@ public class SelectModule extends Module {
         return result;
     }
 
-    private JSONArray selectQuery(String sql, PreparedStatement statement, SQLTimerEntity timer) {
+    private JSONArray selectQuery(String sql, PreparedStatement statement, SQLTimerModel timer) {
         JSONArray result = new JSONArray();
         try (ResultSet resultSet = statement.executeQuery()) {
             ResultSetMetaData metaData = resultSet.getMetaData();

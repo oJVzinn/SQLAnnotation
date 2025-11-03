@@ -2,8 +2,8 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.entity.ConditionalEntity;
-import com.github.ojvzinn.sqlannotation.entity.SQLTimerEntity;
+import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
+import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
@@ -19,7 +19,7 @@ public class DeleteModule extends Module {
 
     public void drop(Class<?> entity) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
-        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         String sql = "DROP TABLE " + tableName.name();
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             connection.createStatement().executeUpdate(sql);
@@ -32,7 +32,7 @@ public class DeleteModule extends Module {
 
     public void truncate(Class<?> entity) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
-        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         String sql = "TRUNCATE TABLE " + tableName.name();
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             connection.createStatement().executeUpdate(sql);
@@ -44,7 +44,7 @@ public class DeleteModule extends Module {
     }
 
     public void deleteByKey(Class<?> entity, Object key) {
-        ConditionalEntity conditional = new ConditionalEntity(ConnectiveType.NONE);
+        ConditionalModel conditional = new ConditionalModel(ConnectiveType.NONE);
         conditional.appendConditional(SQLUtils.findPrimaryKey(entity).getName(), key);
         Entity tableName = SQLUtils.checkIfClassValid(entity);
         delete(tableName.name(), conditional);
@@ -52,7 +52,7 @@ public class DeleteModule extends Module {
 
     public void deleteAll(Class<?> entity) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
-        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         String sql = "DELETE FROM " + tableName.name();
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             connection.createStatement().executeUpdate(sql);
@@ -63,13 +63,13 @@ public class DeleteModule extends Module {
         SQLUtils.loggingQuery(timer, sql);
     }
 
-    public void deleteByConditionals(Class<?> entity, ConditionalEntity conditionals) {
+    public void deleteByConditionals(Class<?> entity, ConditionalModel conditionals) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
         delete(tableName.name(), conditionals);
     }
 
-    public void delete(String table, ConditionalEntity conditional) {
-        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+    public void delete(String table, ConditionalModel conditional) {
+        SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         String SQL = "DELETE FROM " + table + " WHERE" + conditional.build();
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQL);

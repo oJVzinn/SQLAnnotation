@@ -2,8 +2,8 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.entity.ConditionalEntity;
-import com.github.ojvzinn.sqlannotation.entity.SQLTimerEntity;
+import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
+import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ClassType;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
@@ -19,9 +19,9 @@ public class UpdateModule extends Module {
         super(instance);
     }
 
-    public void update(Object entity, ConditionalEntity conditionals) {
+    public void update(Object entity, ConditionalModel conditionals) {
         Entity tableName = SQLUtils.checkIfClassValid(entity.getClass());
-        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         String SQL = "UPDATE " + tableName.name() + " SET " + makeColumns(entity) + " WHERE" + conditionals.build();
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQL);

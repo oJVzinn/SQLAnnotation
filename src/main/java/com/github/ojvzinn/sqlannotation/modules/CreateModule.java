@@ -2,8 +2,8 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.entity.ColumnEntity;
-import com.github.ojvzinn.sqlannotation.entity.SQLTimerEntity;
+import com.github.ojvzinn.sqlannotation.model.ColumnModel;
+import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
 import java.lang.reflect.Field;
@@ -21,9 +21,9 @@ public class CreateModule extends Module {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
         LinkedHashMap<String, Object> columns = new LinkedHashMap<>();
         boolean containsPrimaryKey = false;
-        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         for (Field field : SQLUtils.listFieldColumns(entity)) {
-            ColumnEntity column = SQLUtils.makeColumn(field);
+            ColumnModel column = SQLUtils.makeColumn(field);
             if (column.isPrimaryKey()) {
                 if (containsPrimaryKey) {
                     continue;
@@ -52,7 +52,7 @@ public class CreateModule extends Module {
 
     public void checkColumns(Class<?> entity, LinkedHashMap<String, Object> columns) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
-        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         String sql = getInstance().makeSQLCheckColumn(tableName.name(), columns);
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             connection.createStatement().execute(sql);

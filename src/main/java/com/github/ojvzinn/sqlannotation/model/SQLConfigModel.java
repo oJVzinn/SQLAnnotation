@@ -1,4 +1,4 @@
-package com.github.ojvzinn.sqlannotation.entity;
+package com.github.ojvzinn.sqlannotation.model;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import lombok.Getter;
@@ -8,12 +8,12 @@ import lombok.Setter;
 
 @Getter
 @RequiredArgsConstructor
-public class SQLConfigEntity {
+public class SQLConfigModel {
 
     @NonNull
     private SQL SQLDataBase;
 
-    private final HikariEntity hikariConfig = new HikariEntity();
+    private final HikariModel hikariConfig = new HikariModel();
 
     @Setter
     private boolean log = false;

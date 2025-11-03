@@ -2,7 +2,7 @@ package com.github.ojvzinn.sqlannotation.processor;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.SQLAnnotation;
-import com.github.ojvzinn.sqlannotation.entity.ConditionalEntity;
+import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
 import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
 import com.github.ojvzinn.sqlannotation.interfaces.Processor;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
@@ -22,7 +22,7 @@ public class ProcessorSave implements Processor {
             Object primarykey = primarykeyField.get(entitySave);
             boolean exists = primarykey != null && (sqlDB.getSelectModule().findByKey(entitySave.getClass(), primarykey) != null);
             if (exists) {
-                sqlDB.getUpdateModule().update(entitySave, new ConditionalEntity(ConnectiveType.NONE).appendConditional(primarykeyField.getName(), primarykey));
+                sqlDB.getUpdateModule().update(entitySave, new ConditionalModel(ConnectiveType.NONE).appendConditional(primarykeyField.getName(), primarykey));
                 return null;
             }
 
