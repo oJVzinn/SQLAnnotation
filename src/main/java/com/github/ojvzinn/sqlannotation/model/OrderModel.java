@@ -18,11 +18,11 @@ public class OrderModel {
 
     public String build() {
         StringBuilder sql = new StringBuilder();
-        Set<String> keys = getConditions().keySet();
+        Set<String> keys = this.order.keySet();
         int i = 0;
-        for (String conditional : getConditions().keySet()) {
-            sql.append(" ").append(conditional);
-            if (i + 1 != keys.size()) sql.append(" ").append(getType().name());
+        for (String column : keys) {
+            sql.append(" ").append(column).append(" ").append(order.get(column));
+            if (i + 1 != keys.size()) sql.append(",");
             i++;
         }
 

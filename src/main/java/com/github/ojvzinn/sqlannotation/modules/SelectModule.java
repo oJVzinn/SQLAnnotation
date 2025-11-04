@@ -3,6 +3,7 @@ package com.github.ojvzinn.sqlannotation.modules;
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
 import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
+import com.github.ojvzinn.sqlannotation.model.OrderModel;
 import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
@@ -17,9 +18,9 @@ public class SelectModule extends Module {
         super(instance);
     }
 
-    public <T> T findByConditionals(Class<T> entity, ConditionalModel conditionals) {
+    public <T> T findByConditionals(Class<T> entity, ConditionalModel conditionals, OrderModel order) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
-        JSONArray resultAll = select(tableName.name(), conditionals);
+        JSONArray resultAll = select(tableName.name(), conditionals, order);
         if (resultAll.isEmpty()) return null;
         return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0));
     }
@@ -27,13 +28,13 @@ public class SelectModule extends Module {
     public <T> T findByKey(Class<T> entity, Object key) {
         ConditionalModel conditional = new ConditionalModel(ConnectiveType.NONE);
         conditional.appendConditional(SQLUtils.findPrimaryKey(entity).getName(), key);
-        JSONArray resultAll = findResult(entity, conditional);
+        JSONArray resultAll = findResult(entity, conditional, null);
         if (resultAll.isEmpty()) return null;
         return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0));
     }
 
-    public JSONArray findResult(Class<?> entity, ConditionalModel conditionals) {
-        return select(SQLUtils.checkIfClassValid(entity).name(), conditionals);
+    public JSONArray findResult(Class<?> entity, ConditionalModel conditionals, OrderModel order) {
+        return select(SQLUtils.checkIfClassValid(entity).name(), conditionals, order);
     }
 
     public JSONArray findAll(Class<?> entity) {
@@ -50,10 +51,11 @@ public class SelectModule extends Module {
         return result;
     }
 
-    public JSONArray select(String table, ConditionalModel conditionals) {
+    public JSONArray select(String table, ConditionalModel conditionals, OrderModel order) {
         JSONArray result;
         SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(table).append(" WHERE").append(conditionals.build());
+        if (order != null) sql.append(" ORDER BY ").append(order.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql.toString());
             int i = 1;
@@ -77,10 +79,7 @@ public class SelectModule extends Module {
             int columnCount = metaData.getColumnCount();
             while (resultSet.next()) {
                 JSONObject row = new JSONObject();
-                for (int i = 1; i <= columnCount; i++) {
-                    row.put(metaData.getColumnLabel(i), resultSet.getObject(i));
-                }
-
+                for (int i = 1; i <= columnCount; i++) row.put(metaData.getColumnLabel(i), resultSet.getObject(i));
                 result.put(row);
             }
         } catch (SQLException e) {

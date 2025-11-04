@@ -24,11 +24,11 @@ public class ConditionalModel {
 
     public String build() {
         StringBuilder sql = new StringBuilder();
-        Set<String> keys = getConditions().keySet();
+        Set<String> keys = this.conditions.keySet();
         int i = 0;
-        for (String conditional : getConditions().keySet()) {
+        for (String conditional : keys) {
             sql.append(" ").append(conditional);
-            if (i + 1 != keys.size()) sql.append(" ").append(getType().name());
+            if (i + 1 != keys.size()) sql.append(" ").append(this.type.name());
             i++;
         }
 
