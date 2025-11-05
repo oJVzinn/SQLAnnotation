@@ -1,0 +1,28 @@
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb_db
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: 123456
+      MARIADB_DATABASE: server
+      MARIADB_USER: user
+      MARIADB_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mariadb_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: mariadb
+      PMA_USER: root
+      PMA_PASSWORD: 123456
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "9092:80"
+    depends_on:
+      - mariadb
