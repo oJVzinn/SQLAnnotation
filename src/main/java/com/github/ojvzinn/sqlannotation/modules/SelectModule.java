@@ -37,11 +37,12 @@ public class SelectModule extends Module {
         return select(SQLUtils.checkIfClassValid(entity).name(), conditionals, order);
     }
 
-    public JSONArray findAll(Class<?> entity) {
+    public JSONArray findAll(Class<?> entity, OrderModel order) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
         SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         JSONArray result;
         StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(tableName.name());
+        if (order != null) sql.append(" ORDER BY").append(order.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             result = selectQuery(sql.toString(), connection.prepareStatement(sql.toString()), timer);
         } catch (SQLException e) {
@@ -55,7 +56,7 @@ public class SelectModule extends Module {
         JSONArray result;
         SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(table).append(" WHERE").append(conditionals.build());
-        if (order != null) sql.append(" ORDER BY ").append(order.build());
+        if (order != null) sql.append(" ORDER BY").append(order.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql.toString());
             int i = 1;

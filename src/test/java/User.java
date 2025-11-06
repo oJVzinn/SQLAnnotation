@@ -16,7 +16,7 @@ public class User {
     @PrimaryKey(autoIncrement = true)
     private Long id;
 
-    @Column(notNull = true, unique = true)
+    @Column(notNull = true)
     private String name;
 
     @Column(notNull = true)

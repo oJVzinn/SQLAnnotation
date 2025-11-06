@@ -2,7 +2,8 @@ services:
   mariadb:
     image: mariadb:latest
     container_name: mariadb_db
-    restart: always
+    restart: "no"
+    user: "1000:1000"
     environment:
       MARIADB_ROOT_PASSWORD: 123456
       MARIADB_DATABASE: server
@@ -16,7 +17,8 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
     container_name: phpmyadmin
-    restart: always
+    restart: "no"
+    user: "1000:1000"
     environment:
       PMA_HOST: mariadb
       PMA_USER: root
