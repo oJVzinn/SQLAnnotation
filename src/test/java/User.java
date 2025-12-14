@@ -1,7 +1,4 @@
-import com.github.ojvzinn.sqlannotation.annotations.Column;
-import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.annotations.PrimaryKey;
-import com.github.ojvzinn.sqlannotation.annotations.Varchar;
+import com.github.ojvzinn.sqlannotation.annotations.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -28,5 +25,9 @@ public class User {
     @Varchar(length = 1)
     @Column(notNull = true)
     private String gender;
+
+    @Column
+    @Join(column = "id")
+    private Role roleID;
 
 }

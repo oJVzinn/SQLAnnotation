@@ -6,6 +6,7 @@ import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
 import com.github.ojvzinn.sqlannotation.model.OrderModel;
 import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
+import com.github.ojvzinn.sqlannotation.model.SelectJoinModel;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -18,23 +19,22 @@ public class SelectModule extends Module {
         super(instance);
     }
 
-    public <T> T findByConditionals(Class<T> entity, ConditionalModel conditionals, OrderModel order) {
-        Entity tableName = SQLUtils.checkIfClassValid(entity);
-        JSONArray resultAll = select(tableName.name(), conditionals, order);
+    public <T> T findByConditionals(Class<T> entity, SelectJoinModel joinModel, ConditionalModel conditionals, OrderModel order) {
+        JSONArray resultAll = findResult(entity, joinModel, conditionals, order);
         if (resultAll.isEmpty()) return null;
         return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0));
     }
 
-    public <T> T findByKey(Class<T> entity, Object key) {
+    public <T> T findByKey(Class<T> entity, SelectJoinModel joinModel, Object key) {
         ConditionalModel conditional = new ConditionalModel(ConnectiveType.NONE);
         conditional.appendConditional(SQLUtils.findPrimaryKey(entity).getName(), key);
-        JSONArray resultAll = findResult(entity, conditional, null);
+        JSONArray resultAll = findResult(entity, joinModel, conditional, null);
         if (resultAll.isEmpty()) return null;
         return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0));
     }
 
-    public JSONArray findResult(Class<?> entity, ConditionalModel conditionals, OrderModel order) {
-        return select(SQLUtils.checkIfClassValid(entity).name(), conditionals, order);
+    public JSONArray findResult(Class<?> entity, SelectJoinModel joinModel, ConditionalModel conditionals, OrderModel order) {
+        return select(SQLUtils.checkIfClassValid(entity).name(), joinModel, conditionals, order);
     }
 
     public JSONArray findAll(Class<?> entity, OrderModel order) {
@@ -52,10 +52,15 @@ public class SelectModule extends Module {
         return result;
     }
 
-    public JSONArray select(String table, ConditionalModel conditionals, OrderModel order) {
+    public JSONArray select(String table, SelectJoinModel joinModel, ConditionalModel conditionals, OrderModel order) {
         JSONArray result;
         SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
-        StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(table).append(" WHERE").append(conditionals.build());
+        StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(table);
+        if (joinModel != null) {
+            sql.append(" AS ").append(joinModel.getTableReference()).append(" ").append(joinModel.makeJoinQuery());
+        }
+
+        sql.append(" WHERE").append(conditionals.build());
         if (order != null) sql.append(" ORDER BY").append(order.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(sql.toString());
@@ -65,7 +70,7 @@ public class SelectModule extends Module {
                 i++;
             }
 
-            result = selectQuery(sql.toString(), statement, timer);
+            result = selectQuery(sql.toString(), joinModel != null, statement, timer);
         } catch (SQLException e) {
             throw new RuntimeException("An error occurred while fetching a record", e);
         }
@@ -73,7 +78,7 @@ public class SelectModule extends Module {
         return result;
     }
 
-    private JSONArray selectQuery(String sql, PreparedStatement statement, SQLTimerModel timer) {
+    private JSONArray selectQuery(String sql, boolean isJoinQuery, PreparedStatement statement, SQLTimerModel timer) {
         JSONArray result = new JSONArray();
         try (ResultSet resultSet = statement.executeQuery()) {
             ResultSetMetaData metaData = resultSet.getMetaData();

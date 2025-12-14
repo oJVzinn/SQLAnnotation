@@ -2,12 +2,17 @@ package com.github.ojvzinn.sqlannotation.model;
 
 import com.github.ojvzinn.sqlannotation.enums.OrderType;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 
 import java.util.Set;
 
-@NoArgsConstructor
+@RequiredArgsConstructor
 public class OrderModel {
+
+    @NonNull
+    private SelectJoinModel selectJoinModel;
 
     private final JSONObject order = new JSONObject();
 

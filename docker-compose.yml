@@ -3,7 +3,6 @@ services:
     image: mariadb:latest
     container_name: mariadb_db
     restart: "no"
-    user: "1000:1000"
     environment:
       MARIADB_ROOT_PASSWORD: 123456
       MARIADB_DATABASE: server
@@ -18,7 +17,6 @@ services:
     image: phpmyadmin/phpmyadmin:latest
     container_name: phpmyadmin
     restart: "no"
-    user: "1000:1000"
     environment:
       PMA_HOST: mariadb
       PMA_USER: root
@@ -28,3 +26,5 @@ services:
       - "9092:80"
     depends_on:
       - mariadb
+volumes:
+  mariadb_data:

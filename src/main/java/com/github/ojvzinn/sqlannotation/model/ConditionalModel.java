@@ -15,10 +15,12 @@ public class ConditionalModel {
     @NonNull
     private ConnectiveType type;
 
+    private final SelectJoinModel selectJoinModel;
+
     private final JSONObject conditions = new JSONObject();
 
     public ConditionalModel appendConditional(String column, Object value) {
-        conditions.put(column + " = ?", value);
+        conditions.put((selectJoinModel != null ? selectJoinModel.getTableReference() + "." : "") + column + " = ?", value);
         return this;
     }
 
