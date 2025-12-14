@@ -11,13 +11,12 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class OrderModel {
 
-    @NonNull
-    private SelectJoinModel selectJoinModel;
+    private final SelectJoinModel selectJoinModel;
 
     private final JSONObject order = new JSONObject();
 
     public OrderModel appendAppendOrder(OrderType orderType, String column) {
-        order.put(column, orderType.name());
+        order.put((selectJoinModel != null ? selectJoinModel.getTableReference() + "." : "") + column, orderType.name());
         return this;
     }
 

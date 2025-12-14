@@ -30,6 +30,10 @@ public class SQLUtils {
         return tableName;
     }
 
+    public static boolean containsEntity(Class<?> entity) {
+        return Arrays.stream(entity.getDeclaredFields()).anyMatch(field -> field.getDeclaringClass().isAnnotationPresent(Entity.class));
+    }
+
     public static ColumnModel makeColumn(Field field) {
         Column column = field.getAnnotation(Column.class);
         PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);

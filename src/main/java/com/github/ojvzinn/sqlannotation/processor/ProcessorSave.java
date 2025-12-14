@@ -5,6 +5,7 @@ import com.github.ojvzinn.sqlannotation.SQLAnnotation;
 import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
 import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
 import com.github.ojvzinn.sqlannotation.interfaces.Processor;
+import com.github.ojvzinn.sqlannotation.model.SelectJoinModel;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
 import java.lang.reflect.Field;
@@ -17,12 +18,13 @@ public class ProcessorSave implements Processor {
         Object entitySave = args[0];
         Field primarykeyField = SQLUtils.findPrimaryKey(entitySave.getClass());
         SQL sqlDB = SQLAnnotation.getConfig().getSQLDataBase();
+        SelectJoinModel joinModel = SQLUtils.containsEntity(entity) ? new SelectJoinModel(entity) : null;
         try {
             primarykeyField.setAccessible(true);
             Object primarykey = primarykeyField.get(entitySave);
-            boolean exists = primarykey != null && (sqlDB.getSelectModule().findByKey(entitySave.getClass(), primarykey) != null);
+            boolean exists = primarykey != null && (sqlDB.getSelectModule().findByKey(entitySave.getClass(), joinModel, primarykey) != null);
             if (exists) {
-                sqlDB.getUpdateModule().update(entitySave, new ConditionalModel(ConnectiveType.NONE).appendConditional(primarykeyField.getName(), primarykey));
+                sqlDB.getUpdateModule().update(entitySave, new ConditionalModel(ConnectiveType.NONE, joinModel).appendConditional(primarykeyField.getName(), primarykey));
                 return null;
             }
 

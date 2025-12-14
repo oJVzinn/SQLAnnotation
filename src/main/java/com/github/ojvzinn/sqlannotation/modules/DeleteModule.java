@@ -5,6 +5,7 @@ import com.github.ojvzinn.sqlannotation.annotations.Entity;
 import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
 import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
+import com.github.ojvzinn.sqlannotation.model.SelectJoinModel;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
 import java.sql.Connection;
@@ -44,7 +45,8 @@ public class DeleteModule extends Module {
     }
 
     public void deleteByKey(Class<?> entity, Object key) {
-        ConditionalModel conditional = new ConditionalModel(ConnectiveType.NONE);
+        SelectJoinModel joinModel = SQLUtils.containsEntity(entity) ? new SelectJoinModel(entity) : null;
+        ConditionalModel conditional = new ConditionalModel(ConnectiveType.NONE, joinModel);
         conditional.appendConditional(SQLUtils.findPrimaryKey(entity).getName(), key);
         Entity tableName = SQLUtils.checkIfClassValid(entity);
         delete(tableName.name(), conditional);

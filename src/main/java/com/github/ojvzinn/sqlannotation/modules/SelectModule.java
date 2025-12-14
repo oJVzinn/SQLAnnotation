@@ -26,7 +26,7 @@ public class SelectModule extends Module {
     }
 
     public <T> T findByKey(Class<T> entity, SelectJoinModel joinModel, Object key) {
-        ConditionalModel conditional = new ConditionalModel(ConnectiveType.NONE);
+        ConditionalModel conditional = new ConditionalModel(ConnectiveType.NONE, joinModel);
         conditional.appendConditional(SQLUtils.findPrimaryKey(entity).getName(), key);
         JSONArray resultAll = findResult(entity, joinModel, conditional, null);
         if (resultAll.isEmpty()) return null;
@@ -42,9 +42,10 @@ public class SelectModule extends Module {
         SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         JSONArray result;
         StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(tableName.name());
+        SelectJoinModel joinModel = SQLUtils.containsEntity(entity) ? new SelectJoinModel(entity) : null;
         if (order != null) sql.append(" ORDER BY").append(order.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
-            result = selectQuery(sql.toString(), connection.prepareStatement(sql.toString()), timer);
+            result = selectQuery(sql.toString(), joinModel != null, connection.prepareStatement(sql.toString()), timer);
         } catch (SQLException e) {
             throw new RuntimeException("An error occurred while fetching all records", e);
         }

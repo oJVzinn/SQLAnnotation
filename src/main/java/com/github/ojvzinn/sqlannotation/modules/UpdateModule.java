@@ -2,11 +2,13 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
+import com.github.ojvzinn.sqlannotation.annotations.Join;
 import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
 import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ClassType;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -48,6 +50,12 @@ public class UpdateModule extends Module {
             try {
                 Object value = field.get(entity);
                 ClassType type = ClassType.getType(value.getClass());
+                Join join = field.getAnnotation(Join.class);
+                if (value.getClass().getAnnotation(Entity.class) != null && join != null) {
+                    Field joinParameter = value.getClass().getDeclaredField(join.column());
+                    value = joinParameter.get(value);
+                }
+
                 sb.append(field.getName()).append(" = ").append(type == ClassType.VARCHAR || type == ClassType.TEXT ? ("'" + value + "'") : value);
             } catch (Exception e)  {
                 throw new RuntimeException("An error occurred while loading columns", e);

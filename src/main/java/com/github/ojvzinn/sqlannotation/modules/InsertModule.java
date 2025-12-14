@@ -2,6 +2,7 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
+import com.github.ojvzinn.sqlannotation.annotations.Join;
 import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
@@ -45,9 +46,15 @@ public class InsertModule extends Module {
             Field field = columnsFields.get(i);
             field.setAccessible(true);
             try {
+                Object value = field.get(entity);
+                Join join = field.getAnnotation(Join.class);
+                if (value.getClass().getAnnotation(Entity.class) != null && join != null) {
+                    Field joinParameter = value.getClass().getDeclaredField(join.column());
+                    value = joinParameter.get(value);
+                }
                 columns.append(field.getName());
                 valuesReplace.append("?");
-                values.add(field.get(entity));
+                values.add(value);
             } catch (Exception e)  {
                 throw new RuntimeException(e);
             }

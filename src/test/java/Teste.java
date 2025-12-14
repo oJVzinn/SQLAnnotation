@@ -8,6 +8,7 @@ import org.junit.Test;
 public class Teste {
 
     private final UserRepository repository = SQLAnnotation.loadRepository(UserRepository.class);
+    private final RoleRepository roleRepository = SQLAnnotation.loadRepository(RoleRepository.class);
 
     @Test
     public void main() {
@@ -16,8 +17,20 @@ public class Teste {
         config.setLog(true);
         SQLAnnotation.init(config);
         SQLAnnotation.scanEntity(User.class);
+        SQLAnnotation.scanEntity(Role.class);
 
-        repository.findAll(new OrderModel().appendAppendOrder(OrderType.ASC, "name").appendAppendOrder(OrderType.DESC, "age")).forEach(System.out::println);
+        Role role = new Role();
+        role.setName("Admin");
+        role.setPriority(1);
+        roleRepository.save(role);
+
+        User user = new User();
+        user.setAge(19);
+        user.setName("João Victor");
+        user.setEmail("joaovictor17082006@gmail.com");
+        user.setRoleID(role);
+        user.setGender("M");
+        repository.save(user);
     }
 
 }
