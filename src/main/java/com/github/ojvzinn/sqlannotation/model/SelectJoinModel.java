@@ -2,6 +2,7 @@ package com.github.ojvzinn.sqlannotation.model;
 
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
 import com.github.ojvzinn.sqlannotation.annotations.Join;
+import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 import lombok.AllArgsConstructor;
 
 import java.lang.reflect.Field;
@@ -12,9 +13,30 @@ public class SelectJoinModel {
 
     private Class<?> entityClass;
 
+    public StringBuilder generateSelectQuery() {
+        StringBuilder sql = new StringBuilder("SELECT ");
+        SQLUtils.listFieldColumns(entityClass).forEach(field -> sql.append(getTableReference())
+                .append(".")
+                .append(field.getName())
+                .append(" AS ")
+                .append(getTableReference())
+                .append("_")
+                .append(field.getName()));
+
+        SQLUtils.listFieldColumns(getJoinField().getType()).forEach(field -> sql.append(getJoinTableReference())
+                .append(".")
+                .append(field.getName())
+                .append(" AS ")
+                .append(getTableReference())
+                .append("_")
+                .append(field.getName()));
+
+        return sql;
+    }
+
     public String makeJoinQuery() {
         return "JOIN " +
-                findEntityClass().getName() +
+                findEntityClass().getAnnotation(Entity.class).name() +
                 " AS " +
                 getJoinTableReference() +
                 " ON " +
@@ -61,6 +83,6 @@ public class SelectJoinModel {
     }
 
     private Field getJoinField() {
-        return Arrays.stream(entityClass.getDeclaredFields()).filter(field -> field.getDeclaringClass().equals(findEntityClass())).findFirst().orElse(null);
+        return Arrays.stream(entityClass.getDeclaredFields()).filter(field -> field.getType().equals(findEntityClass())).findFirst().orElse(null);
     }
 }

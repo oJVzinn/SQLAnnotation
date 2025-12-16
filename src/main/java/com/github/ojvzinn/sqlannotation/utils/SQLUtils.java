@@ -28,7 +28,7 @@ public class SQLUtils {
     }
 
     public static boolean containsEntity(Class<?> entity) {
-        return Arrays.stream(entity.getDeclaredFields()).anyMatch(field -> field.getDeclaringClass().isAnnotationPresent(Entity.class));
+        return Arrays.stream(entity.getDeclaredFields()).anyMatch(field -> field.getType().isAnnotationPresent(Entity.class));
     }
 
     public static ColumnModel makeColumn(Field field) {
@@ -80,6 +80,7 @@ public class SQLUtils {
     }
 
     public static <T> T loadClass(Class<T> entity, JSONObject values) {
+        System.out.println(values);
         T instance;
         try {
             Constructor<T> constructor = entity.getDeclaredConstructor();
