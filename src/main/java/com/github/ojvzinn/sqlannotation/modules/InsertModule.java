@@ -48,10 +48,12 @@ public class InsertModule extends Module {
             try {
                 Object value = field.get(entity);
                 Join join = field.getAnnotation(Join.class);
-                if (value.getClass().getAnnotation(Entity.class) != null && join != null) {
+                if (value != null && value.getClass().getAnnotation(Entity.class) != null && join != null) {
                     Field joinParameter = value.getClass().getDeclaredField(join.column());
+                    joinParameter.setAccessible(true);
                     value = joinParameter.get(value);
                 }
+
                 columns.append(field.getName());
                 valuesReplace.append("?");
                 values.add(value);

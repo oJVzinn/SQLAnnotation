@@ -37,9 +37,9 @@ public class SelectJoinModel {
 
     private Class<?> findEntityClass() {
         return Arrays.stream(entityClass.getDeclaredFields())
-                .map(Field::getDeclaringClass)
-                .filter(field -> field.getDeclaringClass().getAnnotation(Entity.class) != null)
-                .findAny().orElse(null);
+                .map(Field::getType)
+                .filter(fieldClass -> fieldClass.getAnnotation(Entity.class) != null)
+                .findFirst().orElse(null);
     }
 
     private String getJoinColumnReference() {

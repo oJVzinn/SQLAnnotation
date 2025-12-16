@@ -1,9 +1,6 @@
 package com.github.ojvzinn.sqlannotation.utils;
 
-import com.github.ojvzinn.sqlannotation.annotations.Column;
-import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.annotations.PrimaryKey;
-import com.github.ojvzinn.sqlannotation.annotations.Varchar;
+import com.github.ojvzinn.sqlannotation.annotations.*;
 import com.github.ojvzinn.sqlannotation.model.ColumnModel;
 import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ClassType;
@@ -40,6 +37,15 @@ public class SQLUtils {
         Varchar varchar = field.getAnnotation(Varchar.class);
         String columnName = field.getName();
         ClassType type = ClassType.getType(field.getType());
+        Join join = field.getAnnotation(Join.class);
+        if (join != null) {
+            try {
+                type = ClassType.getType(field.getType().getDeclaredField(join.column()).getType());
+            } catch (NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         if (type == null) {
             throw new RuntimeException("The field type is invalid");
         }

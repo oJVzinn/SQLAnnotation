@@ -18,4 +18,5 @@ public class Role {
 
     @Column
     private Integer priority;
+
 }
