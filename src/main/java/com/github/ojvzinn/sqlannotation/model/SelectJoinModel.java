@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.List;
 
 @AllArgsConstructor
 public class SelectJoinModel {
@@ -15,22 +16,10 @@ public class SelectJoinModel {
 
     public StringBuilder generateSelectQuery() {
         StringBuilder sql = new StringBuilder("SELECT ");
-        SQLUtils.listFieldColumns(entityClass).forEach(field -> sql.append(getTableReference())
-                .append(".")
-                .append(field.getName())
-                .append(" AS ")
-                .append(getTableReference())
-                .append("_")
-                .append(field.getName()));
 
-        SQLUtils.listFieldColumns(getJoinField().getType()).forEach(field -> sql.append(getJoinTableReference())
-                .append(".")
-                .append(field.getName())
-                .append(" AS ")
-                .append(getTableReference())
-                .append("_")
-                .append(field.getName()));
-
+        addColumns(sql, getTableReference(), SQLUtils.listFieldColumns(entityClass));
+        sql.append(", ");
+        addColumns(sql, getJoinTableReference(), SQLUtils.listFieldColumns(getJoinField().getType()));
         return sql;
     }
 
@@ -84,5 +73,21 @@ public class SelectJoinModel {
 
     private Field getJoinField() {
         return Arrays.stream(entityClass.getDeclaredFields()).filter(field -> field.getType().equals(findEntityClass())).findFirst().orElse(null);
+    }
+
+    private void addColumns(StringBuilder sql, String reference, List<Field> fields) {
+        int i = 0;
+        for (Field field : fields) {
+            sql.append(reference)
+                    .append(".")
+                    .append(field.getName())
+                    .append(" AS ")
+                    .append(reference)
+                    .append("_")
+                    .append(field.getName());
+
+            if (i + 1 != fields.size()) sql.append(", ");
+            i++;
+        }
     }
 }

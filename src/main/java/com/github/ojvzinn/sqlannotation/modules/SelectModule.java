@@ -60,7 +60,7 @@ public class SelectModule extends Module {
         if (joinModel != null) {
             sql = joinModel.generateSelectQuery();
             System.out.println(joinModel.getTableReference() + " ; " + joinModel.getJoinTableReference() + "1");
-            sql.append(" AS ").append(joinModel.getTableReference()).append(" ").append(joinModel.makeJoinQuery());
+            sql.append(" FROM ").append(table).append(" AS ").append(joinModel.getTableReference()).append(" ").append(joinModel.makeJoinQuery());
         }
 
         sql.append(" WHERE").append(conditionals.build());
