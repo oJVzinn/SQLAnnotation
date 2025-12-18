@@ -22,7 +22,7 @@ public class SelectModule extends Module {
     public <T> T findByConditionals(Class<T> entity, SelectJoinModel joinModel, ConditionalModel conditionals, OrderModel order) {
         JSONArray resultAll = findResult(entity, joinModel, conditionals, order);
         if (resultAll.isEmpty()) return null;
-        return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0));
+        return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0), joinModel);
     }
 
     public <T> T findByKey(Class<T> entity, SelectJoinModel joinModel, Object key) {
@@ -30,7 +30,7 @@ public class SelectModule extends Module {
         conditional.appendConditional(SQLUtils.findPrimaryKey(entity).getName(), key);
         JSONArray resultAll = findResult(entity, joinModel, conditional, null);
         if (resultAll.isEmpty()) return null;
-        return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0));
+        return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0), joinModel);
     }
 
     public JSONArray findResult(Class<?> entity, SelectJoinModel joinModel, ConditionalModel conditionals, OrderModel order) {
@@ -42,10 +42,9 @@ public class SelectModule extends Module {
         SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         JSONArray result;
         StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(tableName.name());
-        SelectJoinModel joinModel = SQLUtils.containsEntity(entity) ? new SelectJoinModel(entity) : null;
         if (order != null) sql.append(" ORDER BY").append(order.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
-            result = selectQuery(sql.toString(), joinModel != null, connection.prepareStatement(sql.toString()), timer);
+            result = selectQuery(sql.toString(), connection.prepareStatement(sql.toString()), timer);
         } catch (SQLException e) {
             throw new RuntimeException("An error occurred while fetching all records", e);
         }
@@ -74,7 +73,7 @@ public class SelectModule extends Module {
                 i++;
             }
 
-            result = selectQuery(sql.toString(), joinModel != null, statement, timer);
+            result = selectQuery(sql.toString(), statement, timer);
         } catch (SQLException e) {
             throw new RuntimeException("An error occurred while fetching a record", e);
         }
@@ -82,7 +81,7 @@ public class SelectModule extends Module {
         return result;
     }
 
-    private JSONArray selectQuery(String sql, boolean isJoinQuery, PreparedStatement statement, SQLTimerModel timer) {
+    private JSONArray selectQuery(String sql, PreparedStatement statement, SQLTimerModel timer) {
         JSONArray result = new JSONArray();
         try (ResultSet resultSet = statement.executeQuery()) {
             ResultSetMetaData metaData = resultSet.getMetaData();

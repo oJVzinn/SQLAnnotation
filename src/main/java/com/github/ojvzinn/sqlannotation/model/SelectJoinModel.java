@@ -25,7 +25,7 @@ public class SelectJoinModel {
 
     public String makeJoinQuery() {
         return "JOIN " +
-                findEntityClass().getAnnotation(Entity.class).name() +
+                findJoinEntityClass().getAnnotation(Entity.class).name() +
                 " AS " +
                 getJoinTableReference() +
                 " ON " +
@@ -43,10 +43,10 @@ public class SelectJoinModel {
     }
 
     public String getJoinTableReference() {
-        return findEntityClass().getAnnotation(Entity.class).name().toLowerCase();
+        return findJoinEntityClass().getAnnotation(Entity.class).name().toLowerCase();
     }
 
-    private Class<?> findEntityClass() {
+    public Class<?> findJoinEntityClass() {
         return Arrays.stream(entityClass.getDeclaredFields())
                 .map(Field::getType)
                 .filter(fieldClass -> fieldClass.getAnnotation(Entity.class) != null)
@@ -72,7 +72,7 @@ public class SelectJoinModel {
     }
 
     private Field getJoinField() {
-        return Arrays.stream(entityClass.getDeclaredFields()).filter(field -> field.getType().equals(findEntityClass())).findFirst().orElse(null);
+        return Arrays.stream(entityClass.getDeclaredFields()).filter(field -> field.getType().equals(findJoinEntityClass())).findFirst().orElse(null);
     }
 
     private void addColumns(StringBuilder sql, String reference, List<Field> fields) {

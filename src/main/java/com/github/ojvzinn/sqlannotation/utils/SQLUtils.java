@@ -5,6 +5,7 @@ import com.github.ojvzinn.sqlannotation.model.ColumnModel;
 import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ClassType;
 import com.github.ojvzinn.sqlannotation.logger.SQLogger;
+import com.github.ojvzinn.sqlannotation.model.SelectJoinModel;
 import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
@@ -79,13 +80,14 @@ public class SQLUtils {
         return fieldKey;
     }
 
-    public static <T> T loadClass(Class<T> entity, JSONObject values) {
+    public static <T> T loadClass(Class<T> entity, JSONObject values, SelectJoinModel joinModel) {
         System.out.println(values);
         T instance;
         try {
             Constructor<T> constructor = entity.getDeclaredConstructor();
             constructor.setAccessible(true);
             instance = constructor.newInstance();
+            Object joinEntity = loadJoinEntity(joinModel, values);
             for (Field field : SQLUtils.listFieldColumns(entity)) {
                 if (!values.keySet().contains(field.getName())) {
                     continue;
@@ -105,4 +107,25 @@ public class SQLUtils {
         logger.info("QUERY EXECUTED: " + sql + ". Was executed in " + timer.stop() + " ms.");
     }
 
+    private static Object loadJoinEntity(SelectJoinModel joinModel, JSONObject values) {
+        if (joinModel == null) return null;
+        try {
+            Constructor<?> constructor = joinModel.findJoinEntityClass().getDeclaredConstructor();
+            constructor.setAccessible(true);
+            Object entity = constructor.newInstance();
+            for (Field field : SQLUtils.listFieldColumns(entity.getClass())) {
+                String columnName = joinModel.getJoinTableReference() + "_" + field.getName();
+                if (!values.keySet().contains(columnName)) {
+                    continue;
+                }
+
+                field.setAccessible(true);
+                field.set(entity, values.get(columnName));
+            }
+
+            return entity;
+        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("Nao foi possivel carregar a entidade de relacionamento.", e);
+        }
+    }
 }
