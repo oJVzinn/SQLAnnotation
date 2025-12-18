@@ -30,6 +30,7 @@ public class Teste {
         repository.save(user);*/
 
         User user = repository.findByKey(1L);
+        System.out.println(user.toString());
         System.out.println("O usuário " + user.getName() + " possui o cargo: " + user.getRoleID().getName());
     }
 

@@ -89,12 +89,13 @@ public class SQLUtils {
             instance = constructor.newInstance();
             Object joinEntity = loadJoinEntity(joinModel, values);
             for (Field field : SQLUtils.listFieldColumns(entity)) {
-                if (!values.keySet().contains(field.getName())) {
+                String finalColumn = getFinalColumnName(field.getName(), joinModel);
+                if (!values.keySet().contains(finalColumn)) {
                     continue;
                 }
 
                 field.setAccessible(true);
-                field.set(instance, values.get(field.getName()));
+                field.set(instance, joinEntity != null && field.getAnnotation(Join.class) != null ? joinEntity : values.get(field.getName()));
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("An error occurred while loading your entity class. Report this to developer \"oJVzinn\"", e);
@@ -127,5 +128,9 @@ public class SQLUtils {
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("Nao foi possivel carregar a entidade de relacionamento.", e);
         }
+    }
+
+    private static String getFinalColumnName(String field, SelectJoinModel joinModel) {
+        return joinModel != null ? field.replace(joinModel.getTableReference() + "_", "") + field : field;
     }
 }
