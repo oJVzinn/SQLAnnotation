@@ -19,7 +19,12 @@ public class Teste {
         SQLAnnotation.scanEntity(User.class);
         SQLAnnotation.scanEntity(Role.class);
 
-/*        Role role = roleRepository.findByKey(1);
+/*        Role role = new Role();
+        role.setName("admin");
+        role.setPriority(0);
+        roleRepository.save(role);
+
+        role = roleRepository.findByKey(1);
 
         User user = new User();
         user.setAge(19);

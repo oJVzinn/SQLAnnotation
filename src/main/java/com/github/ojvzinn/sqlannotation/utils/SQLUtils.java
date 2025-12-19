@@ -81,7 +81,6 @@ public class SQLUtils {
     }
 
     public static <T> T loadClass(Class<T> entity, JSONObject values, SelectJoinModel joinModel) {
-        System.out.println(values);
         T instance;
         try {
             Constructor<T> constructor = entity.getDeclaredConstructor();
@@ -91,11 +90,12 @@ public class SQLUtils {
             for (Field field : SQLUtils.listFieldColumns(entity)) {
                 String finalColumn = getFinalColumnName(field.getName(), joinModel);
                 if (!values.keySet().contains(finalColumn)) {
+                    System.out.println(finalColumn);
                     continue;
                 }
 
                 field.setAccessible(true);
-                field.set(instance, joinEntity != null && field.getAnnotation(Join.class) != null ? joinEntity : values.get(field.getName()));
+                field.set(instance, joinEntity != null && field.getAnnotation(Join.class) != null ? joinEntity : values.get(finalColumn));
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("An error occurred while loading your entity class. Report this to developer \"oJVzinn\"", e);
@@ -131,6 +131,6 @@ public class SQLUtils {
     }
 
     private static String getFinalColumnName(String field, SelectJoinModel joinModel) {
-        return joinModel != null ? field.replace(joinModel.getTableReference() + "_", "") + field : field;
+        return joinModel != null ? joinModel.getTableReference() + "_" + field : field;
     }
 }
