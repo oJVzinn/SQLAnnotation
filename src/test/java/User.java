@@ -3,7 +3,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Entity(name = "USERS")
+@Entity(name = "users")
 @Getter
 @ToString
 @Setter

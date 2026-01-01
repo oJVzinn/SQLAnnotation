@@ -19,12 +19,10 @@ public class Teste {
         SQLAnnotation.scanEntity(User.class);
         SQLAnnotation.scanEntity(Role.class);
 
-/*        Role role = new Role();
+        Role role = new Role();
+        role.setPriority(1);
         role.setName("admin");
-        role.setPriority(0);
         roleRepository.save(role);
-
-        role = roleRepository.findByKey(1);
 
         User user = new User();
         user.setAge(19);
@@ -32,11 +30,9 @@ public class Teste {
         user.setEmail("joaovictor17082006@gmail.com");
         user.setRoleID(role);
         user.setGender("M");
-        repository.save(user);*/
+        repository.save(user);
 
-        User user = repository.findByKey(1L);
-        System.out.println(user.toString());
-        System.out.println("O usuário " + user.getName() + " possui o cargo: " + user.getRoleID().getName());
+        System.out.println("ID gerado: " + user.getId());
     }
 
 }

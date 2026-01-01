@@ -58,7 +58,6 @@ public class SelectModule extends Module {
         StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(table);
         if (joinModel != null) {
             sql = joinModel.generateSelectQuery();
-            System.out.println(joinModel.getTableReference() + " ; " + joinModel.getJoinTableReference() + "1");
             sql.append(" FROM ").append(table).append(" AS ").append(joinModel.getTableReference()).append(" ").append(joinModel.makeJoinQuery());
         }
 
