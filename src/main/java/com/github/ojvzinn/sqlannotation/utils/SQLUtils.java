@@ -28,8 +28,27 @@ public class SQLUtils {
         return tableName;
     }
 
+    public static Object getValueJoinField(Field joinEntityField, Object joinEntity) {
+        try {
+            Join join = joinEntityField.getAnnotation(Join.class);
+            Field joinParameter = joinEntity.getClass().getDeclaredField(join.column());
+            joinParameter.setAccessible(true);
+            return joinParameter.get(joinEntity);
+        } catch (NoSuchFieldException | SecurityException | IllegalAccessException e) {
+            throw new RuntimeException("Error processing the value of the join entity", e);
+        }
+    }
+
+    public static boolean isJoinField(Field joinEntityField, Object joinEntity) {
+        return joinEntityField.getAnnotation(Join.class) != null && joinEntity.getClass().getAnnotation(Entity.class) != null;
+    }
+
     public static boolean containsEntity(Class<?> entity) {
         return Arrays.stream(entity.getDeclaredFields()).anyMatch(field -> field.getType().isAnnotationPresent(Entity.class));
+    }
+
+    public static SelectJoinModel getSelectJoinModel(Class<?> entity) {
+        return SQLUtils.containsEntity(entity) ? new SelectJoinModel(entity) : null;
     }
 
     public static ColumnModel makeColumn(Field field) {
@@ -126,7 +145,7 @@ public class SQLUtils {
 
             return entity;
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("Nao foi possivel carregar a entidade de relacionamento.", e);
+            throw new RuntimeException("The relationship entity could not be loaded.", e);
         }
     }
 

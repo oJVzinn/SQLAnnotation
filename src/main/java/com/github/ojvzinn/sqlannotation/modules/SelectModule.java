@@ -64,7 +64,6 @@ public class SelectModule extends Module {
         sql.append(" WHERE").append(conditionals.build());
         if (order != null) sql.append(" ORDER BY").append(order.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
-            System.out.println(sql);
             PreparedStatement statement = connection.prepareStatement(sql.toString());
             int i = 1;
             for (String key : conditionals.getConditions().keySet()) {

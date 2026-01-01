@@ -18,7 +18,7 @@ public class ProcessorSave implements Processor {
         Object entitySave = args[0];
         Field primarykeyField = SQLUtils.findPrimaryKey(entitySave.getClass());
         SQL sqlDB = SQLAnnotation.getConfig().getSQLDataBase();
-        SelectJoinModel joinModel = SQLUtils.containsEntity(entity) ? new SelectJoinModel(entity) : null;
+        SelectJoinModel joinModel = SQLUtils.getSelectJoinModel(entity);
         try {
             primarykeyField.setAccessible(true);
             Object primarykey = primarykeyField.get(entitySave);

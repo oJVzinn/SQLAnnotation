@@ -19,17 +19,8 @@ public class Teste {
         SQLAnnotation.scanEntity(User.class);
         SQLAnnotation.scanEntity(Role.class);
 
-        Role role = new Role();
-        role.setPriority(1);
-        role.setName("admin");
-        roleRepository.save(role);
-
-        User user = new User();
-        user.setAge(19);
-        user.setName("João Victor");
-        user.setEmail("joaovictor17082006@gmail.com");
-        user.setRoleID(role);
-        user.setGender("M");
+        User user = repository.findByKey(1);
+        user.setName("João Victor Updated 2");
         repository.save(user);
 
         System.out.println("ID gerado: " + user.getId());

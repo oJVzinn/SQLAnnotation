@@ -27,10 +27,7 @@ public class InsertModule extends Module {
         String SQL = "INSERT INTO " + tableName.name() + "(" + columns + ") VALUES (" + valuesReplace + ")";
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
-            for (int i = 1; i <= values.size(); i++) {
-                statement.setObject(i, values.get(i - 1));
-            }
-
+            for (int i = 1; i <= values.size(); i++) statement.setObject(i, values.get(i - 1));
             statement.executeUpdate();
             insertID(statement.getGeneratedKeys(), entity);
         } catch (SQLException e) {
@@ -50,13 +47,7 @@ public class InsertModule extends Module {
             field.setAccessible(true);
             try {
                 Object value = field.get(entity);
-                Join join = field.getAnnotation(Join.class);
-                if (value != null && value.getClass().getAnnotation(Entity.class) != null && join != null) {
-                    Field joinParameter = value.getClass().getDeclaredField(join.column());
-                    joinParameter.setAccessible(true);
-                    value = joinParameter.get(value);
-                }
-
+                if (value != null && SQLUtils.isJoinField(field, value)) value = SQLUtils.getValueJoinField(field, value);
                 columns.append(field.getName());
                 valuesReplace.append("?");
                 values.add(value);

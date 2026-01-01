@@ -16,7 +16,6 @@ public class SelectJoinModel {
 
     public StringBuilder generateSelectQuery() {
         StringBuilder sql = new StringBuilder("SELECT ");
-
         addColumns(sql, getTableReference(), SQLUtils.listFieldColumns(entityClass));
         sql.append(", ");
         addColumns(sql, getJoinTableReference(), SQLUtils.listFieldColumns(getJoinField().getType()));

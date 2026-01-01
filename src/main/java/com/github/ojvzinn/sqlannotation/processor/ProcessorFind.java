@@ -17,7 +17,7 @@ public class ProcessorFind implements Processor {
     public Object process(Method method, Object[] args, Class<?> entity) {
         String type = method.getName().split("find")[1];
         FindType findType = FindType.findByType(type);
-        SelectJoinModel joinModel = SQLUtils.containsEntity(entity) ? new SelectJoinModel(entity) : null;
+        SelectJoinModel joinModel = SQLUtils.getSelectJoinModel(entity);
         if (findType == null) throw new RuntimeException("Type " + type + " not found");
         OrderModel order = extractOrderModel(args);
         switch (findType) {

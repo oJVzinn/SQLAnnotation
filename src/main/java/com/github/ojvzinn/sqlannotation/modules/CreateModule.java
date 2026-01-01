@@ -25,10 +25,7 @@ public class CreateModule extends Module {
         for (Field field : SQLUtils.listFieldColumns(entity)) {
             ColumnModel column = SQLUtils.makeColumn(field);
             if (column.isPrimaryKey()) {
-                if (containsPrimaryKey) {
-                    continue;
-                }
-
+                if (containsPrimaryKey) continue;
                 containsPrimaryKey = true;
             }
 

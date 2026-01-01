@@ -50,12 +50,7 @@ public class UpdateModule extends Module {
             try {
                 Object value = field.get(entity);
                 ClassType type = ClassType.getType(value.getClass());
-                Join join = field.getAnnotation(Join.class);
-                if (value.getClass().getAnnotation(Entity.class) != null && join != null) {
-                    Field joinParameter = value.getClass().getDeclaredField(join.column());
-                    value = joinParameter.get(value);
-                }
-
+                if (SQLUtils.isJoinField(field, value)) value = SQLUtils.getValueJoinField(field, value);
                 sb.append(field.getName()).append(" = ").append(type == ClassType.VARCHAR || type == ClassType.TEXT ? ("'" + value + "'") : value);
             } catch (Exception e)  {
                 throw new RuntimeException("An error occurred while loading columns", e);
