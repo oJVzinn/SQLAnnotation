@@ -1,9 +1,9 @@
-package com.github.ojvzinn.sqlannotation.entity;
+package com.github.ojvzinn.sqlannotation.model;
 
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class SQLTimerEntity {
+public class SQLTimerModel {
 
     private Long start;
 

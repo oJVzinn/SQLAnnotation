@@ -2,11 +2,13 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.entity.ConditionalEntity;
-import com.github.ojvzinn.sqlannotation.entity.SQLTimerEntity;
+import com.github.ojvzinn.sqlannotation.annotations.Join;
+import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
+import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ClassType;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -19,9 +21,9 @@ public class UpdateModule extends Module {
         super(instance);
     }
 
-    public void update(Object entity, ConditionalEntity conditionals) {
+    public void update(Object entity, ConditionalModel conditionals) {
         Entity tableName = SQLUtils.checkIfClassValid(entity.getClass());
-        SQLTimerEntity timer = new SQLTimerEntity(System.currentTimeMillis());
+        SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         String SQL = "UPDATE " + tableName.name() + " SET " + makeColumns(entity) + " WHERE" + conditionals.build();
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             PreparedStatement statement = connection.prepareStatement(SQL);
@@ -40,7 +42,7 @@ public class UpdateModule extends Module {
     }
 
     private String makeColumns(Object entity) {
-        List<Field> columnsFields = SQLUtils.listFieldColumns(entity.getClass());
+        List<Field> columnsFields = SQLUtils.listFieldColumns(entity.getClass(), false);
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < columnsFields.size(); i++) {
             Field field = columnsFields.get(i);
@@ -48,6 +50,7 @@ public class UpdateModule extends Module {
             try {
                 Object value = field.get(entity);
                 ClassType type = ClassType.getType(value.getClass());
+                if (SQLUtils.isJoinField(field, value)) value = SQLUtils.getValueJoinField(field, value);
                 sb.append(field.getName()).append(" = ").append(type == ClassType.VARCHAR || type == ClassType.TEXT ? ("'" + value + "'") : value);
             } catch (Exception e)  {
                 throw new RuntimeException("An error occurred while loading columns", e);

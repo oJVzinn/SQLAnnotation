@@ -1,4 +1,4 @@
-package com.github.ojvzinn.sqlannotation.entity;
+package com.github.ojvzinn.sqlannotation.model;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.zaxxer.hikari.HikariConfig;
@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import java.util.LinkedHashMap;
 
 @AllArgsConstructor
-public class MySQLEntity extends SQL {
+public class MySQLModel extends SQL {
 
     private String host;
     private int port;
@@ -17,7 +17,7 @@ public class MySQLEntity extends SQL {
     private String password;
 
     @Override
-    public void init(HikariEntity entity) {
+    public void init(HikariModel entity) {
         try {
             HikariConfig config = entity.getConfig();
             config.setJdbcUrl("jdbc:mysql://" + host + ":" + port + "/" + database);
@@ -44,7 +44,7 @@ public class MySQLEntity extends SQL {
         sb.append("CREATE TABLE IF NOT EXISTS ").append(table).append(" (");
         int i = 0;
         for (String key : columns.keySet()) {
-            ColumnEntity entity = (ColumnEntity) columns.get(key);
+            ColumnModel entity = (ColumnModel) columns.get(key);
             String builder = "`" +
                     entity.getName() +
                     "`" +
@@ -70,7 +70,7 @@ public class MySQLEntity extends SQL {
         sb.append("ALTER TABLE ").append(table);
         int i = 0;
         for (String key : columns.keySet()) {
-            ColumnEntity entity = (ColumnEntity) columns.get(key);
+            ColumnModel entity = (ColumnModel) columns.get(key);
             String builder = "`" +
                     entity.getName() +
                     "`" +
@@ -80,10 +80,7 @@ public class MySQLEntity extends SQL {
                     (entity.isUnique() ? " UNIQUE" : "") +(entity.isUnique() ? " UNIQUE" : "") +
                     (entity.isNotNull() ? " NOT NULL" : "");
             sb.append(" ADD COLUMN IF NOT EXISTS ").append(builder);
-            if (i + 1 < columns.keySet().size()) {
-                sb.append(", ");
-            }
-
+            if (i + 1 < columns.keySet().size()) sb.append(", ");
             i++;
         }
 

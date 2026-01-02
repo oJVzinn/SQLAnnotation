@@ -1,14 +1,14 @@
-package com.github.ojvzinn.sqlannotation.entity;
+package com.github.ojvzinn.sqlannotation.model;
 
 import com.zaxxer.hikari.HikariConfig;
 import lombok.Getter;
 
 @Getter
-public class HikariEntity {
+public class HikariModel {
 
     private final HikariConfig config = new HikariConfig();
 
-    public HikariEntity() {
+    public HikariModel() {
         this.config.addDataSourceProperty("cachePrepStmts", "true");
         this.config.addDataSourceProperty("useServerPrepStmts", "true");
         this.config.addDataSourceProperty("useLocalSessionState", "true");

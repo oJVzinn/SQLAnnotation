@@ -8,4 +8,6 @@ public interface UserRepository extends Repository<User> {
 
     void deleteAllByConditionalsAgeAndEmail(Integer age, String email);
     void deleteByAge(Integer age);
+
+
 }

@@ -1,12 +1,9 @@
-import com.github.ojvzinn.sqlannotation.annotations.Column;
-import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.annotations.PrimaryKey;
-import com.github.ojvzinn.sqlannotation.annotations.Varchar;
+import com.github.ojvzinn.sqlannotation.annotations.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@Entity(name = "USERS")
+@Entity(name = "users")
 @Getter
 @ToString
 @Setter
@@ -16,7 +13,7 @@ public class User {
     @PrimaryKey(autoIncrement = true)
     private Long id;
 
-    @Column(notNull = true, unique = true)
+    @Column(notNull = true)
     private String name;
 
     @Column(notNull = true)
@@ -28,5 +25,13 @@ public class User {
     @Varchar(length = 1)
     @Column(notNull = true)
     private String gender;
+
+    @Column
+    @Join(column = "id")
+    private Role roleID;
+
+    @Column
+    @Join(column = "id")
+    private Department departmentID;
 
 }

@@ -1,11 +1,11 @@
-package com.github.ojvzinn.sqlannotation.entity;
+package com.github.ojvzinn.sqlannotation.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class ColumnEntity {
+public class ColumnModel {
 
     private String name;
     private String type;

@@ -1,6 +1,6 @@
 package com.github.ojvzinn.sqlannotation;
 
-import com.github.ojvzinn.sqlannotation.entity.HikariEntity;
+import com.github.ojvzinn.sqlannotation.model.HikariModel;
 import com.github.ojvzinn.sqlannotation.modules.*;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
@@ -19,7 +19,7 @@ public abstract class SQL {
     private SelectModule selectModule = new SelectModule(this);
     private UpdateModule updateModule = new UpdateModule(this);
 
-    public abstract void init(HikariEntity entity);
+    public abstract void init(HikariModel model);
 
     public abstract void destroy();
 

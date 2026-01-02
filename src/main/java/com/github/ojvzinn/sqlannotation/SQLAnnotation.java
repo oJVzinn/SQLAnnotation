@@ -1,6 +1,6 @@
 package com.github.ojvzinn.sqlannotation;
 
-import com.github.ojvzinn.sqlannotation.entity.SQLConfigEntity;
+import com.github.ojvzinn.sqlannotation.model.SQLConfigModel;
 import com.github.ojvzinn.sqlannotation.interfaces.Repository;
 import com.github.ojvzinn.sqlannotation.processor.RepositoryProcessor;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import lombok.Getter;
 public class SQLAnnotation {
 
     @Getter
-    private static SQLConfigEntity config;
+    private static SQLConfigModel config;
 
     private static final RepositoryProcessor processor = new RepositoryProcessor();
 
@@ -24,9 +24,9 @@ public class SQLAnnotation {
         config.getSQLDataBase().getDeleteModule().drop(entity);
     }
 
-    public static void init(SQLConfigEntity entity) {
-        entity.init();
-        config = entity;
+    public static void init(SQLConfigModel model) {
+        model.init();
+        config = model;
     }
 
     public static void destroy() {

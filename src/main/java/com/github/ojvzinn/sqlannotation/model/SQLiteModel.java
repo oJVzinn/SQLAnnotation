@@ -1,13 +1,13 @@
-package com.github.ojvzinn.sqlannotation.entity;
+package com.github.ojvzinn.sqlannotation.model;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 
 import java.util.LinkedHashMap;
 
-public class SQLiteEntity extends SQL {
+public class SQLiteModel extends SQL {
 
     @Override
-    public void init(HikariEntity entity) {
+    public void init(HikariModel model) {
 
     }
 

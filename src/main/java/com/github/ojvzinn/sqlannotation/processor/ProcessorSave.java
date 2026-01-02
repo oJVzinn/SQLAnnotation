@@ -2,9 +2,10 @@ package com.github.ojvzinn.sqlannotation.processor;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.SQLAnnotation;
-import com.github.ojvzinn.sqlannotation.entity.ConditionalEntity;
+import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
 import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
 import com.github.ojvzinn.sqlannotation.interfaces.Processor;
+import com.github.ojvzinn.sqlannotation.model.SelectJoinModel;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
 import java.lang.reflect.Field;
@@ -17,12 +18,14 @@ public class ProcessorSave implements Processor {
         Object entitySave = args[0];
         Field primarykeyField = SQLUtils.findPrimaryKey(entitySave.getClass());
         SQL sqlDB = SQLAnnotation.getConfig().getSQLDataBase();
+        SelectJoinModel joinModel = SQLUtils.getSelectJoinModel(entity);
         try {
             primarykeyField.setAccessible(true);
-            Object primarykey = primarykeyField.get(entitySave);
-            boolean exists = primarykey != null && (sqlDB.getSelectModule().findByKey(entitySave.getClass(), primarykey) != null);
+            Object primaryKey = primarykeyField.get(entitySave);
+            boolean exists = primaryKey != null && (sqlDB.getSelectModule().findByKey(entitySave.getClass(), joinModel, primaryKey) != null);
             if (exists) {
-                sqlDB.getUpdateModule().update(entitySave, new ConditionalEntity(ConnectiveType.NONE).appendConditional(primarykeyField.getName(), primarykey));
+                sqlDB.getUpdateModule().update(entitySave, new ConditionalModel(ConnectiveType.NONE, joinModel)
+                        .appendConditional(primarykeyField.getName(), primaryKey));
                 return null;
             }
 
