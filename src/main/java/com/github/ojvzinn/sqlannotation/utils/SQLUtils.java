@@ -11,8 +11,10 @@ import org.json.JSONObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class SQLUtils {
@@ -21,9 +23,7 @@ public class SQLUtils {
 
     public static Entity checkIfClassValid(Class<?> entity) {
         Entity tableName = entity.getAnnotation(Entity.class);
-        if (tableName == null) {
-            throw new RuntimeException("The table class needs to come with the @Entity annotation");
-        }
+        if (tableName == null) throw new RuntimeException("The table class needs to come with the @Entity annotation");
 
         return tableName;
     }
@@ -66,35 +66,26 @@ public class SQLUtils {
             }
         }
 
-        if (type == null) {
-            throw new RuntimeException("The field type is invalid");
-        }
+        if (type == null) throw new RuntimeException("The field type is invalid");
 
-        boolean autoIncrement = false;
         int size = varchar != null ? varchar.length() : 0;
-        if ((size <= 0 || size > 255) && type == ClassType.VARCHAR) {
-            throw new RuntimeException("Invalid varchar size value");
-        }
+        if ((size <= 0 || size > 255) && type == ClassType.VARCHAR) throw new RuntimeException("Invalid varchar size value");
 
-        if (primaryKey != null) autoIncrement = primaryKey.autoIncrement();
+        boolean autoIncrement = primaryKey != null && primaryKey.autoIncrement();
 
         return new ColumnModel(columnName, type.getType(), column.notNull(), autoIncrement, primaryKey != null, column.unique(), size);
     }
 
-    public static LinkedList<Field> listFieldColumns(Class<?> entity) {
+    public static LinkedList<Field> listFieldColumns(Class<?> entity, boolean spliceJoinFields) {
         Field[] fields = entity.getDeclaredFields();
-        if (fields.length == 0) {
-            throw new RuntimeException("To create a table it is necessary to have at least one column field");
-        }
+        if (fields.length == 0) throw new RuntimeException("To create a table it is necessary to have at least one column field");
 
-        return Arrays.stream(fields).filter(field -> field.getAnnotation(Column.class) != null).collect(Collectors.toCollection(LinkedList::new));
+        return Arrays.stream(fields).filter(field -> field.getAnnotation(Column.class) != null && (!spliceJoinFields || field.getAnnotation(Join.class) == null)).collect(Collectors.toCollection(LinkedList::new));
     }
 
     public static Field findPrimaryKey(Class<?> entity) {
         Field fieldKey = Arrays.stream(entity.getDeclaredFields()).filter(field -> field.getAnnotation(PrimaryKey.class) != null).findFirst().orElse(null);
-        if (fieldKey == null) {
-            throw new RuntimeException("There is no primary key column in your table");
-        }
+        if (fieldKey == null) throw new RuntimeException("There is no primary key column in your table");
 
         return fieldKey;
     }
@@ -105,16 +96,13 @@ public class SQLUtils {
             Constructor<T> constructor = entity.getDeclaredConstructor();
             constructor.setAccessible(true);
             instance = constructor.newInstance();
-            Object joinEntity = loadJoinEntity(joinModel, values);
-            for (Field field : SQLUtils.listFieldColumns(entity)) {
+            List<Object> joinEntities = loadJoinEntity(joinModel, values);
+            for (Field field : SQLUtils.listFieldColumns(entity, false)) {
                 String finalColumn = getFinalColumnName(field.getName(), joinModel);
-                if (!values.keySet().contains(finalColumn)) {
-                    System.out.println(finalColumn);
-                    continue;
-                }
+                if (!values.keySet().contains(finalColumn)) continue;
 
                 field.setAccessible(true);
-                field.set(instance, joinEntity != null && field.getAnnotation(Join.class) != null ? joinEntity : values.get(finalColumn));
+                field.set(instance, !joinEntities.isEmpty() && field.getAnnotation(Join.class) != null ? findJoinEntityByField(field, joinEntities) : values.get(finalColumn));
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("An error occurred while loading your entity class. Report this to developer \"oJVzinn\"", e);
@@ -127,29 +115,36 @@ public class SQLUtils {
         logger.info("QUERY EXECUTED: " + sql + ". Was executed in " + timer.stop() + " ms.");
     }
 
-    private static Object loadJoinEntity(SelectJoinModel joinModel, JSONObject values) {
+    private static List<Object> loadJoinEntity(SelectJoinModel joinModel, JSONObject values) {
         if (joinModel == null) return null;
+        List<Object> entities = new ArrayList<>();
         try {
-            Constructor<?> constructor = joinModel.findJoinEntityClass().getDeclaredConstructor();
-            constructor.setAccessible(true);
-            Object entity = constructor.newInstance();
-            for (Field field : SQLUtils.listFieldColumns(entity.getClass())) {
-                String columnName = joinModel.getJoinTableReference() + "_" + field.getName();
-                if (!values.keySet().contains(columnName)) {
-                    continue;
+            for (Class<?> entityClass : joinModel.findJoinEntitiesClass()) {
+                Constructor<?> constructor = entityClass.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                Object entity = constructor.newInstance();
+                for (Field field : SQLUtils.listFieldColumns(entityClass, false)) {
+                    String columnName = joinModel.getTableReference(entityClass) + "_" + field.getName();
+                    if (!values.keySet().contains(columnName)) continue;
+
+                    field.setAccessible(true);
+                    field.set(entity, values.get(columnName));
                 }
 
-                field.setAccessible(true);
-                field.set(entity, values.get(columnName));
+                entities.add(entity);
             }
 
-            return entity;
+            return entities;
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("The relationship entity could not be loaded.", e);
         }
     }
 
+    private static Object findJoinEntityByField(Field field, List<Object> entities) {
+        return entities.stream().filter(entity -> entity.getClass().isAssignableFrom(field.getType())).findFirst().orElse(null);
+    }
+
     private static String getFinalColumnName(String field, SelectJoinModel joinModel) {
-        return joinModel != null ? joinModel.getTableReference() + "_" + field : field;
+        return joinModel != null ? joinModel.getEntityTableReference() + "_" + field : field;
     }
 }

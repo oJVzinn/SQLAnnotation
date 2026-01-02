@@ -30,4 +30,8 @@ public class User {
     @Join(column = "id")
     private Role roleID;
 
+    @Column
+    @Join(column = "id")
+    private Department departmentID;
+
 }

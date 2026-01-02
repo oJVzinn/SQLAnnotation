@@ -58,12 +58,13 @@ public class SelectModule extends Module {
         StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(table);
         if (joinModel != null) {
             sql = joinModel.generateSelectQuery();
-            sql.append(" FROM ").append(table).append(" AS ").append(joinModel.getTableReference()).append(" ").append(joinModel.makeJoinQuery());
+            sql.append(" FROM ").append(table).append(" AS ").append(joinModel.getEntityTableReference()).append(" ").append(joinModel.makeJoinQuery());
         }
 
         sql.append(" WHERE").append(conditionals.build());
         if (order != null) sql.append(" ORDER BY").append(order.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
+            System.out.println(sql);
             PreparedStatement statement = connection.prepareStatement(sql.toString());
             int i = 1;
             for (String key : conditionals.getConditions().keySet()) {
@@ -89,6 +90,7 @@ public class SelectModule extends Module {
                 for (int i = 1; i <= columnCount; i++) row.put(metaData.getColumnLabel(i), resultSet.getObject(i));
                 result.put(row);
             }
+
         } catch (SQLException e) {
             throw new RuntimeException("An error occurred while fetching all records", e);
         }

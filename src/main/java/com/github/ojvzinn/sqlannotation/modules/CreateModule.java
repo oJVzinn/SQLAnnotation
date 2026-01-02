@@ -22,7 +22,7 @@ public class CreateModule extends Module {
         LinkedHashMap<String, Object> columns = new LinkedHashMap<>();
         boolean containsPrimaryKey = false;
         SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
-        for (Field field : SQLUtils.listFieldColumns(entity)) {
+        for (Field field : SQLUtils.listFieldColumns(entity, false)) {
             ColumnModel column = SQLUtils.makeColumn(field);
             if (column.isPrimaryKey()) {
                 if (containsPrimaryKey) continue;

@@ -9,6 +9,7 @@ public class Teste {
 
     private final UserRepository repository = SQLAnnotation.loadRepository(UserRepository.class);
     private final RoleRepository roleRepository = SQLAnnotation.loadRepository(RoleRepository.class);
+    private final DepartmentRepository departmentRepository = SQLAnnotation.loadRepository(DepartmentRepository.class);
 
     @Test
     public void main() {
@@ -18,12 +19,12 @@ public class Teste {
         SQLAnnotation.init(config);
         SQLAnnotation.scanEntity(User.class);
         SQLAnnotation.scanEntity(Role.class);
+        SQLAnnotation.scanEntity(Department.class);
 
         User user = repository.findByKey(1);
-        user.setName("João Victor Updated 2");
-        repository.save(user);
+        System.out.println("O usuário " + user.getName() + " possui cargo: " + user.getRoleID().getName() + " está no departamento: " + user.getDepartmentID().getName());
 
-        System.out.println("ID gerado: " + user.getId());
+
     }
 
 }

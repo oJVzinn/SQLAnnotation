@@ -21,10 +21,11 @@ public class ProcessorSave implements Processor {
         SelectJoinModel joinModel = SQLUtils.getSelectJoinModel(entity);
         try {
             primarykeyField.setAccessible(true);
-            Object primarykey = primarykeyField.get(entitySave);
-            boolean exists = primarykey != null && (sqlDB.getSelectModule().findByKey(entitySave.getClass(), joinModel, primarykey) != null);
+            Object primaryKey = primarykeyField.get(entitySave);
+            boolean exists = primaryKey != null && (sqlDB.getSelectModule().findByKey(entitySave.getClass(), joinModel, primaryKey) != null);
             if (exists) {
-                sqlDB.getUpdateModule().update(entitySave, new ConditionalModel(ConnectiveType.NONE, joinModel).appendConditional(primarykeyField.getName(), primarykey));
+                sqlDB.getUpdateModule().update(entitySave, new ConditionalModel(ConnectiveType.NONE, joinModel)
+                        .appendConditional(primarykeyField.getName(), primaryKey));
                 return null;
             }
 

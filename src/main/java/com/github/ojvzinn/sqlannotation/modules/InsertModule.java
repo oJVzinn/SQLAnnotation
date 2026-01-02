@@ -2,7 +2,6 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.annotations.Join;
 import com.github.ojvzinn.sqlannotation.annotations.PrimaryKey;
 import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
@@ -40,7 +39,7 @@ public class InsertModule extends Module {
     }
 
     private LinkedList<Object> loadValues(StringBuilder columns, StringBuilder valuesReplace, Object entity) {
-        List<Field> columnsFields = SQLUtils.listFieldColumns(entity.getClass());
+        List<Field> columnsFields = SQLUtils.listFieldColumns(entity.getClass(), false);
         LinkedList<Object> values = new LinkedList<>();
         for (int i = 0; i < columnsFields.size(); i++) {
             Field field = columnsFields.get(i);

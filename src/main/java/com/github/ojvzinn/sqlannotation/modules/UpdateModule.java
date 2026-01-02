@@ -42,7 +42,7 @@ public class UpdateModule extends Module {
     }
 
     private String makeColumns(Object entity) {
-        List<Field> columnsFields = SQLUtils.listFieldColumns(entity.getClass());
+        List<Field> columnsFields = SQLUtils.listFieldColumns(entity.getClass(), false);
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < columnsFields.size(); i++) {
             Field field = columnsFields.get(i);

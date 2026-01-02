@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class SelectJoinModel {
@@ -16,62 +17,59 @@ public class SelectJoinModel {
 
     public StringBuilder generateSelectQuery() {
         StringBuilder sql = new StringBuilder("SELECT ");
-        addColumns(sql, getTableReference(), SQLUtils.listFieldColumns(entityClass));
+        addColumns(sql, getTableReference(entityClass), SQLUtils.listFieldColumns(entityClass, false));
         sql.append(", ");
-        addColumns(sql, getJoinTableReference(), SQLUtils.listFieldColumns(getJoinField().getType()));
+        List<Class<?>> joinEntities = findJoinEntitiesClass();
+        for (int i = 0; i < joinEntities.size(); i++) {
+            Class<?> entityClass = joinEntities.get(i);
+            addColumns(sql, getTableReference(entityClass),
+                    SQLUtils.listFieldColumns(entityClass, false));
+            if (i != joinEntities.size() - 1) sql.append(", ");
+        }
+
         return sql;
     }
 
     public String makeJoinQuery() {
-        return "JOIN " +
-                findJoinEntityClass().getAnnotation(Entity.class).name() +
-                " AS " +
-                getJoinTableReference() +
-                " ON " +
-                getTableReference() +
-                "." +
-                getColumnReference() +
-                " = " +
-                getJoinTableReference() +
-                "." +
-                getJoinColumnReference();
+        StringBuilder finalJoin = new StringBuilder();
+        List<Class<?>> joinEntities = findJoinEntitiesClass();
+        for (int i = 0; i < joinEntities.size(); i++) {
+            Class<?> entityClass = joinEntities.get(i);
+            Field entityField = findFieldByType(entityClass);
+            finalJoin.append("JOIN ")
+                    .append(entityClass.getAnnotation(Entity.class).name())
+                    .append(" ON ")
+                    .append(getEntityTableReference())
+                    .append(".")
+                    .append(entityField.getName())
+                    .append(" = ")
+                    .append(getTableReference(entityClass))
+                    .append(".")
+                    .append(entityField.getAnnotation(Join.class).column());
+            if (i < joinEntities.size() - 1) finalJoin.append(" ");
+        }
+
+        return finalJoin.toString();
     }
 
-    public String getTableReference() {
+    public String getEntityTableReference() {
+        return getTableReference(entityClass);
+    }
+
+    public String getTableReference(Class<?> entityClass) {
         return entityClass.getAnnotation(Entity.class).name().toLowerCase();
     }
 
-    public String getJoinTableReference() {
-        return findJoinEntityClass().getAnnotation(Entity.class).name().toLowerCase();
+    public List<Class<?>> findJoinEntitiesClass() {
+        return listJoinFields().stream().map(Field::getType).collect(Collectors.toList());
     }
 
-    public Class<?> findJoinEntityClass() {
-        return Arrays.stream(entityClass.getDeclaredFields())
-                .map(Field::getType)
-                .filter(fieldClass -> fieldClass.getAnnotation(Entity.class) != null)
-                .findFirst().orElse(null);
+    private List<Field> listJoinFields() {
+        return Arrays.stream(entityClass.getDeclaredFields()).filter(field -> field.getAnnotation(Join.class) != null).collect(Collectors.toList());
     }
 
-    private String getJoinColumnReference() {
-        Field joinEntityField = getJoinField();
-        if (joinEntityField == null) {
-            throw new IllegalArgumentException("Join entity class doesn't exist");
-        }
-
-        return joinEntityField.getAnnotation(Join.class).column();
-    }
-
-    private String getColumnReference() {
-        Field joinEntityField = getJoinField();
-        if (joinEntityField == null) {
-            throw new IllegalArgumentException("Join entity class doesn't exist");
-        }
-
-        return joinEntityField.getName();
-    }
-
-    private Field getJoinField() {
-        return Arrays.stream(entityClass.getDeclaredFields()).filter(field -> field.getType().equals(findJoinEntityClass())).findFirst().orElse(null);
+    private Field findFieldByType(Class<?> type) {
+        return Arrays.stream(entityClass.getDeclaredFields()).filter(field -> field.getType().equals(type)).findFirst().orElse(null);
     }
 
     private void addColumns(StringBuilder sql, String reference, List<Field> fields) {
@@ -89,4 +87,5 @@ public class SelectJoinModel {
             i++;
         }
     }
+
 }

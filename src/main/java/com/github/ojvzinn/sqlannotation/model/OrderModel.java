@@ -16,7 +16,7 @@ public class OrderModel {
     private final JSONObject order = new JSONObject();
 
     public OrderModel appendAppendOrder(OrderType orderType, String column) {
-        order.put((selectJoinModel != null ? selectJoinModel.getTableReference() + "." : "") + column, orderType.name());
+        order.put((selectJoinModel != null ? selectJoinModel.getEntityTableReference() + "." : "") + column, orderType.name());
         return this;
     }
 

@@ -42,7 +42,6 @@ public class ProcessorFind implements Processor {
                             .getSelectModule()
                             .findResult(entity, joinModel, (ConditionalModel) args[0], order);
 
-
                 String name = type.split(findType.getType())[1];
                 String[] conditionals = name.split("And");
                 ConditionalModel conditional = new ConditionalModel(ConnectiveType.AND, joinModel);
@@ -56,11 +55,11 @@ public class ProcessorFind implements Processor {
 
     private OrderModel extractOrderModel(Object[] args) {
         OrderModel order = null;
-        for (Object arg : args) if (arg instanceof OrderModel) {
+        for (Object arg : args)
+            if (arg instanceof OrderModel) {
                 order = (OrderModel) arg;
                 break;
             }
-
 
         return order;
     }
