@@ -102,7 +102,7 @@ public class SQLUtils {
                 if (!values.keySet().contains(finalColumn)) continue;
 
                 field.setAccessible(true);
-                field.set(instance, !joinEntities.isEmpty() && field.getAnnotation(Join.class) != null ? findJoinEntityByField(field, joinEntities) : values.get(finalColumn));
+                field.set(instance, joinEntities != null && !joinEntities.isEmpty() && field.getAnnotation(Join.class) != null ? findJoinEntityByField(field, joinEntities) : values.get(finalColumn));
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("An error occurred while loading your entity class. Report this to developer \"oJVzinn\"", e);

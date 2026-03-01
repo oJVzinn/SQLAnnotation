@@ -22,9 +22,13 @@ public class Teste {
         SQLAnnotation.scanEntity(Department.class);
 
         User user = repository.findByKey(1);
-        System.out.println("O usuário " + user.getName() + " possui cargo: " + user.getRoleID().getName() + " está no departamento: " + user.getDepartmentID().getName());
+        Department department = new Department();
+        department.setName("Diretoria");
+        department.setManager(user);
+        departmentRepository.save(department);
 
-
+        User finalUser = department.getManager();
+        System.out.println("Cargo do usuário" + finalUser.getName() + " é: " + department.getManager().getRoleID().getName());
     }
 
 }
