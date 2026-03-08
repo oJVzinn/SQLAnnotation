@@ -44,12 +44,9 @@ public class MainTest {
     @Test
     @Order(3)
     public void clearTables() {
-        try (Connection connection = SQLAnnotation.getConfig().getHikariConfig().getConfig().getDataSource().getConnection()) {
-            Statement statement = connection.createStatement();
-            for (String table : Arrays.asList("user", "role", "department")) statement.execute("TRUNCATE TABLE " + table);
-        } catch (SQLException e) {
-            throw new RuntimeException("Ocorreu um erro ao limpar as tabelas!", e);
-        }
+        SQLAnnotation.truncate(User.class);
+        SQLAnnotation.truncate(Role.class);
+        SQLAnnotation.truncate(Department.class);
     }
 
     @Test
