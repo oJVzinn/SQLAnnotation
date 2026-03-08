@@ -1,8 +1,10 @@
 import com.github.ojvzinn.sqlannotation.SQLAnnotation;
+import com.github.ojvzinn.sqlannotation.model.LimitModel;
 import com.github.ojvzinn.sqlannotation.model.MySQLModel;
 import com.github.ojvzinn.sqlannotation.model.SQLConfigModel;
 import department.Department;
 import department.DepartmentRepository;
+import org.json.JSONArray;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -100,4 +102,13 @@ public class MainTest {
         System.out.println("Pelo preço de 30.00, temos o produto: " + productRepository.findByPrice(30.00).getName());
     }
 
+    @Test
+    @Order(10)
+    public void testLimit() {
+        JSONArray users = userRepository.findAll(new LimitModel(2));
+        System.out.println("Foi encontrado " + users.length() + " usários");
+
+        users = userRepository.findAll(new LimitModel(3));
+        System.out.println("Foi encontrado " + users.length() + " usários");
+    }
 }

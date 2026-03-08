@@ -2,11 +2,8 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
-import com.github.ojvzinn.sqlannotation.model.OrderModel;
-import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
+import com.github.ojvzinn.sqlannotation.model.*;
 import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
-import com.github.ojvzinn.sqlannotation.model.SelectJoinModel;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -19,8 +16,8 @@ public class SelectModule extends Module {
         super(instance);
     }
 
-    public <T> T findByConditionals(Class<T> entity, SelectJoinModel joinModel, ConditionalModel conditionals, OrderModel order) {
-        JSONArray resultAll = findResult(entity, joinModel, conditionals, order);
+    public <T> T findByConditionals(Class<T> entity, SelectJoinModel joinModel, ConditionalModel conditionals, OrderModel order, LimitModel limit) {
+        JSONArray resultAll = findResult(entity, joinModel, conditionals, order, limit);
         if (resultAll.isEmpty()) return null;
         return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0), joinModel);
     }
@@ -28,21 +25,22 @@ public class SelectModule extends Module {
     public <T> T findByKey(Class<T> entity, SelectJoinModel joinModel, Object key) {
         ConditionalModel conditional = new ConditionalModel(ConnectiveType.NONE, joinModel);
         conditional.appendConditional(SQLUtils.findPrimaryKey(entity).getName(), key);
-        JSONArray resultAll = findResult(entity, joinModel, conditional, null);
+        JSONArray resultAll = findResult(entity, joinModel, conditional, null, null);
         if (resultAll.isEmpty()) return null;
         return SQLUtils.loadClass(entity, (JSONObject) resultAll.get(0), joinModel);
     }
 
-    public JSONArray findResult(Class<?> entity, SelectJoinModel joinModel, ConditionalModel conditionals, OrderModel order) {
-        return select(SQLUtils.checkIfClassValid(entity).name(), joinModel, conditionals, order);
+    public JSONArray findResult(Class<?> entity, SelectJoinModel joinModel, ConditionalModel conditionals, OrderModel order, LimitModel limit) {
+        return select(SQLUtils.checkIfClassValid(entity).name(), joinModel, conditionals, order, limit);
     }
 
-    public JSONArray findAll(Class<?> entity, OrderModel order) {
+    public JSONArray findAll(Class<?> entity, OrderModel order, LimitModel limit) {
         Entity tableName = SQLUtils.checkIfClassValid(entity);
         SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         JSONArray result;
         StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(tableName.name());
         if (order != null) sql.append(" ORDER BY").append(order.build());
+        if (limit != null) sql.append(" ").append(limit.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             result = selectQuery(sql.toString(), connection.prepareStatement(sql.toString()), timer);
         } catch (SQLException e) {
@@ -52,7 +50,7 @@ public class SelectModule extends Module {
         return result;
     }
 
-    public JSONArray select(String table, SelectJoinModel joinModel, ConditionalModel conditionals, OrderModel order) {
+    public JSONArray select(String table, SelectJoinModel joinModel, ConditionalModel conditionals, OrderModel order, LimitModel limit) {
         JSONArray result;
         SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
         StringBuilder sql = new StringBuilder().append("SELECT * FROM ").append(table);
@@ -63,6 +61,7 @@ public class SelectModule extends Module {
 
         sql.append(" WHERE").append(conditionals.build());
         if (order != null) sql.append(" ORDER BY").append(order.build());
+        if (limit != null) sql.append(" ").append(limit.build());
         try (Connection connection = getInstance().getDataSource().getConnection()) {
             System.out.println(sql);
             PreparedStatement statement = connection.prepareStatement(sql.toString());
