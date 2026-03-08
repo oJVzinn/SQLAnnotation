@@ -1,3 +1,5 @@
+package user;
+
 import com.github.ojvzinn.sqlannotation.interfaces.Repository;
 import org.json.JSONArray;
 

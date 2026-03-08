@@ -1,13 +1,15 @@
+package department;
+
 import com.github.ojvzinn.sqlannotation.annotations.Column;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.annotations.Join;
 import com.github.ojvzinn.sqlannotation.annotations.PrimaryKey;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Entity(name = "departament")
+@Entity(name = "department")
 @Getter
 @Setter
+@RequiredArgsConstructor
+@NoArgsConstructor
 public class Department {
 
     @Column
@@ -15,10 +17,7 @@ public class Department {
     private Long id;
 
     @Column
+    @NonNull
     private String name;
-
-    @Column
-    @Join(column = "id")
-    private User manager;
 
 }
