@@ -12,7 +12,9 @@ public enum ClassType {
     INT(Integer.class),
     TEXT(String.class),
     VARCHAR(String.class),
-    BIGINT(Long.class);
+    BIGINT(Long.class),
+    DOUBLE(Double.class),
+    FLOAT(Float.class);
 
     private final Class<?> classType;
 

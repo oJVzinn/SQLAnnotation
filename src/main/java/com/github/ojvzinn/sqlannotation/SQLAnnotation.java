@@ -24,6 +24,10 @@ public class SQLAnnotation {
         config.getSQLDataBase().getDeleteModule().drop(entity);
     }
 
+    public static void truncate(Class<?> entity) {
+        config.getSQLDataBase().getDeleteModule().truncate(entity);
+    }
+
     public static void init(SQLConfigModel model) {
         model.init();
         config = model;
