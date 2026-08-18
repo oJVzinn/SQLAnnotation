@@ -2,17 +2,15 @@ package com.github.ojvzinn.sqlannotation.modules;
 
 import com.github.ojvzinn.sqlannotation.SQL;
 import com.github.ojvzinn.sqlannotation.annotations.Entity;
-import com.github.ojvzinn.sqlannotation.annotations.Join;
 import com.github.ojvzinn.sqlannotation.model.ConditionalModel;
 import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
-import com.github.ojvzinn.sqlannotation.enums.ClassType;
 import com.github.ojvzinn.sqlannotation.utils.SQLUtils;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 
 public class UpdateModule extends Module {
@@ -24,13 +22,17 @@ public class UpdateModule extends Module {
     public void update(Object entity, ConditionalModel conditionals) {
         Entity tableName = SQLUtils.checkIfClassValid(entity.getClass());
         SQLTimerModel timer = new SQLTimerModel(System.currentTimeMillis());
-        String SQL = "UPDATE " + tableName.name() + " SET " + makeColumns(entity) + " WHERE" + conditionals.build();
+        StringBuilder columnsBuilder = new StringBuilder();
+        LinkedList<Object> updateValues = loadUpdateValues(columnsBuilder, entity);
+        String sql = "UPDATE " + tableName.name() + " SET " + columnsBuilder + " WHERE" + conditionals.build();
         try (Connection connection = getInstance().getDataSource().getConnection()) {
-            PreparedStatement statement = connection.prepareStatement(SQL);
-            int i = 1;
+            PreparedStatement statement = connection.prepareStatement(sql);
+            int index = 1;
+            for (Object value : updateValues) {
+                statement.setObject(index++, value);
+            }
             for (String key : conditionals.getConditions().keySet()) {
-                statement.setObject(i, conditionals.getConditions().get(key));
-                i++;
+                statement.setObject(index++, conditionals.getConditions().get(key));
             }
 
             statement.executeUpdate();
@@ -38,27 +40,31 @@ public class UpdateModule extends Module {
             throw new RuntimeException("An error occurred while updating the entity", e);
         }
 
-        SQLUtils.loggingQuery(timer, SQL);
+        SQLUtils.loggingQuery(timer, sql);
     }
 
-    private String makeColumns(Object entity) {
+    private LinkedList<Object> loadUpdateValues(StringBuilder columnsBuilder, Object entity) {
         List<Field> columnsFields = SQLUtils.listFieldColumns(entity.getClass(), false);
-        StringBuilder sb = new StringBuilder();
+        LinkedList<Object> values = new LinkedList<>();
         for (int i = 0; i < columnsFields.size(); i++) {
             Field field = columnsFields.get(i);
             field.setAccessible(true);
             try {
                 Object value = field.get(entity);
-                ClassType type = ClassType.getType(value.getClass());
-                if (SQLUtils.isJoinField(field, value)) value = SQLUtils.getValueJoinField(field, value);
-                sb.append(field.getName()).append(" = ").append(type == ClassType.VARCHAR || type == ClassType.TEXT ? ("'" + value + "'") : value);
-            } catch (Exception e)  {
-                throw new RuntimeException("An error occurred while loading columns", e);
+                if (value != null && SQLUtils.isJoinField(field, value)) {
+                    value = SQLUtils.getValueJoinField(field, value);
+                }
+                columnsBuilder.append(field.getName()).append(" = ?");
+                values.add(value);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException("An error occurred while loading field values", e);
             }
 
-            if (i + 1 < columnsFields.size()) sb.append(", ");
+            if (i + 1 < columnsFields.size()) {
+                columnsBuilder.append(", ");
+            }
         }
 
-        return sb.toString();
+        return values;
     }
 }
