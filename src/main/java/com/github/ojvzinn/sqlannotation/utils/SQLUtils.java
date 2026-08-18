@@ -1,5 +1,6 @@
 package com.github.ojvzinn.sqlannotation.utils;
 
+import com.github.ojvzinn.sqlannotation.SQLAnnotation;
 import com.github.ojvzinn.sqlannotation.annotations.*;
 import com.github.ojvzinn.sqlannotation.model.ColumnModel;
 import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
@@ -112,7 +113,9 @@ public class SQLUtils {
     }
 
     public static void loggingQuery(SQLTimerModel timer, String sql) {
-        logger.info("QUERY EXECUTED: " + sql + ". Was executed in " + timer.stop() + " ms.");
+        if (SQLAnnotation.getConfig() != null && SQLAnnotation.getConfig().isLog()) {
+            logger.info("QUERY EXECUTED: " + sql + ". Was executed in " + timer.stop() + " ms.");
+        }
     }
 
     private static List<Object> loadJoinEntity(SelectJoinModel joinModel, JSONObject values) {
