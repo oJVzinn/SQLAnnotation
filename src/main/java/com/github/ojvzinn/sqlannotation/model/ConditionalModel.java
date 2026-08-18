@@ -4,8 +4,9 @@ import com.github.ojvzinn.sqlannotation.enums.ConnectiveType;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -17,7 +18,7 @@ public class ConditionalModel {
 
     private final SelectJoinModel selectJoinModel;
 
-    private final JSONObject conditions = new JSONObject();
+    private final Map<String, Object> conditions = new LinkedHashMap<>();
 
     public ConditionalModel appendConditional(String column, Object value) {
         conditions.put((selectJoinModel != null ? selectJoinModel.getEntityTableReference() + "." : "") + column + " = ?", value);

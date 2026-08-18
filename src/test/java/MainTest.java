@@ -4,7 +4,6 @@ import com.github.ojvzinn.sqlannotation.model.MySQLModel;
 import com.github.ojvzinn.sqlannotation.model.SQLConfigModel;
 import department.Department;
 import department.DepartmentRepository;
-import org.json.JSONArray;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -15,6 +14,8 @@ import role.Role;
 import role.RoleRepository;
 import user.User;
 import user.UserRepository;
+
+import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class MainTest {
@@ -105,10 +106,10 @@ public class MainTest {
     @Test
     @Order(10)
     public void testLimit() {
-        JSONArray users = userRepository.findAll(new LimitModel(2));
-        System.out.println("Foi encontrado " + users.length() + " usários");
+        List<User> users = userRepository.findAll(new LimitModel(2));
+        System.out.println("Foi encontrado " + users.size() + " usários");
 
         users = userRepository.findAll(new LimitModel(3));
-        System.out.println("Foi encontrado " + users.length() + " usários");
+        System.out.println("Foi encontrado " + users.size() + " usários");
     }
 }

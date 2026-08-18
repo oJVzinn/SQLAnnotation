@@ -6,7 +6,6 @@ import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ClassType;
 import com.github.ojvzinn.sqlannotation.logger.SQLogger;
 import com.github.ojvzinn.sqlannotation.model.SelectJoinModel;
-import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -15,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SQLUtils {
@@ -90,7 +90,7 @@ public class SQLUtils {
         return fieldKey;
     }
 
-    public static <T> T loadClass(Class<T> entity, JSONObject values, SelectJoinModel joinModel) {
+    public static <T> T loadClass(Class<T> entity, Map<String, Object> values, SelectJoinModel joinModel) {
         T instance;
         try {
             Constructor<T> constructor = entity.getDeclaredConstructor();
@@ -99,7 +99,7 @@ public class SQLUtils {
             List<Object> joinEntities = loadJoinEntity(joinModel, values);
             for (Field field : SQLUtils.listFieldColumns(entity, false)) {
                 String finalColumn = getFinalColumnName(field.getName(), joinModel);
-                if (!values.keySet().contains(finalColumn)) continue;
+                if (!values.containsKey(finalColumn)) continue;
 
                 field.setAccessible(true);
                 field.set(instance, joinEntities != null && !joinEntities.isEmpty() && field.getAnnotation(Join.class) != null ? findJoinEntityByField(field, joinEntities) : values.get(finalColumn));
@@ -115,7 +115,7 @@ public class SQLUtils {
         logger.info("QUERY EXECUTED: " + sql + ". Was executed in " + timer.stop() + " ms.");
     }
 
-    private static List<Object> loadJoinEntity(SelectJoinModel joinModel, JSONObject values) {
+    private static List<Object> loadJoinEntity(SelectJoinModel joinModel, Map<String, Object> values) {
         if (joinModel == null) return null;
         List<Object> entities = new ArrayList<>();
         try {
@@ -125,7 +125,7 @@ public class SQLUtils {
                 Object entity = constructor.newInstance();
                 for (Field field : SQLUtils.listFieldColumns(entityClass, false)) {
                     String columnName = joinModel.getTableReference(entityClass) + "_" + field.getName();
-                    if (!values.keySet().contains(columnName)) continue;
+                    if (!values.containsKey(columnName)) continue;
 
                     field.setAccessible(true);
                     field.set(entity, values.get(columnName));

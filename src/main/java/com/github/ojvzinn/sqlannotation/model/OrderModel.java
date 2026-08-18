@@ -1,11 +1,10 @@
 package com.github.ojvzinn.sqlannotation.model;
 
 import com.github.ojvzinn.sqlannotation.enums.OrderType;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.json.JSONObject;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 @RequiredArgsConstructor
@@ -13,7 +12,7 @@ public class OrderModel {
 
     private final SelectJoinModel selectJoinModel;
 
-    private final JSONObject order = new JSONObject();
+    private final Map<String, String> order = new LinkedHashMap<>();
 
     public OrderModel appendAppendOrder(OrderType orderType, String column) {
         order.put((selectJoinModel != null ? selectJoinModel.getEntityTableReference() + "." : "") + column, orderType.name());

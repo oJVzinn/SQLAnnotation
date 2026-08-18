@@ -144,7 +144,7 @@ public class User {
 ```java
 import com.github.ojvzinn.sqlannotation.interfaces.Repository;
 import com.github.ojvzinn.sqlannotation.model.LimitModel;
-import org.json.JSONArray;
+import java.util.List;
 
 public interface UserRepository extends Repository<User> {
 
@@ -152,9 +152,9 @@ public interface UserRepository extends Repository<User> {
 
     User findByEmail(String email);
 
-    JSONArray findAllByConditionalsAgeAndName(Integer age, String name);
+    List<User> findAllByConditionalsAgeAndName(Integer age, String name);
 
-    JSONArray findAll(LimitModel limit);
+    List<User> findAll(LimitModel limit);
 
     void deleteAllByConditionalsAgeAndEmail(Integer age, String email);
 
