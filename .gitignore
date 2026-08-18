@@ -39,3 +39,5 @@ build/
 
 ### DOCKER_COMPOSE ###
 mariadb_data/
+issues
+ANALYSIS.md
