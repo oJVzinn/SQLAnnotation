@@ -31,11 +31,13 @@ public class MySQLModel extends SQL {
 
     @Override
     public void destroy() {
+        if (getDataSource() != null && !getDataSource().isClosed()) {
+            getDataSource().close();
+        }
         this.host = null;
         this.database = null;
         this.user = null;
         this.password = null;
-        getDataSource().close();
     }
 
     @Override
@@ -77,7 +79,7 @@ public class MySQLModel extends SQL {
                     " " + entity.makeType() +
                     (entity.isPrimaryKey() ? " PRIMARY KEY" : "") +
                     (entity.isAutoIncrement() ? " AUTO_INCREMENT" : "") +
-                    (entity.isUnique() ? " UNIQUE" : "") +(entity.isUnique() ? " UNIQUE" : "") +
+                    (entity.isUnique() ? " UNIQUE" : "") +
                     (entity.isNotNull() ? " NOT NULL" : "");
             sb.append(" ADD COLUMN IF NOT EXISTS ").append(builder);
             if (i + 1 < columns.keySet().size()) sb.append(", ");
