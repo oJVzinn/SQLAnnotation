@@ -1,20 +1,29 @@
 package com.github.ojvzinn.sqlannotation.utils;
 
+import com.github.ojvzinn.sqlannotation.SQLAnnotation;
 import com.github.ojvzinn.sqlannotation.annotations.*;
 import com.github.ojvzinn.sqlannotation.model.ColumnModel;
 import com.github.ojvzinn.sqlannotation.model.SQLTimerModel;
 import com.github.ojvzinn.sqlannotation.enums.ClassType;
 import com.github.ojvzinn.sqlannotation.logger.SQLogger;
 import com.github.ojvzinn.sqlannotation.model.SelectJoinModel;
-import org.json.JSONObject;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class SQLUtils {
@@ -56,16 +65,17 @@ public class SQLUtils {
         PrimaryKey primaryKey = field.getAnnotation(PrimaryKey.class);
         Varchar varchar = field.getAnnotation(Varchar.class);
         String columnName = field.getName();
-        ClassType type = ClassType.getType(field.getType());
+        Class<?> targetType = field.getType();
         Join join = field.getAnnotation(Join.class);
         if (join != null) {
             try {
-                type = ClassType.getType(field.getType().getDeclaredField(join.column()).getType());
+                targetType = field.getType().getDeclaredField(join.column()).getType();
             } catch (NoSuchFieldException e) {
                 throw new RuntimeException(e);
             }
         }
 
+        ClassType type = ClassType.getType(targetType, varchar != null);
         if (type == null) throw new RuntimeException("The field type is invalid");
 
         int size = varchar != null ? varchar.length() : 0;
@@ -90,7 +100,7 @@ public class SQLUtils {
         return fieldKey;
     }
 
-    public static <T> T loadClass(Class<T> entity, JSONObject values, SelectJoinModel joinModel) {
+    public static <T> T loadClass(Class<T> entity, Map<String, Object> values, SelectJoinModel joinModel) {
         T instance;
         try {
             Constructor<T> constructor = entity.getDeclaredConstructor();
@@ -99,10 +109,10 @@ public class SQLUtils {
             List<Object> joinEntities = loadJoinEntity(joinModel, values);
             for (Field field : SQLUtils.listFieldColumns(entity, false)) {
                 String finalColumn = getFinalColumnName(field.getName(), joinModel);
-                if (!values.keySet().contains(finalColumn)) continue;
+                if (!values.containsKey(finalColumn)) continue;
 
                 field.setAccessible(true);
-                field.set(instance, joinEntities != null && !joinEntities.isEmpty() && field.getAnnotation(Join.class) != null ? findJoinEntityByField(field, joinEntities) : values.get(finalColumn));
+                field.set(instance, joinEntities != null && !joinEntities.isEmpty() && field.getAnnotation(Join.class) != null ? findJoinEntityByField(field, joinEntities) : convertValue(values.get(finalColumn), field.getType()));
             }
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new RuntimeException("An error occurred while loading your entity class. Report this to developer \"oJVzinn\"", e);
@@ -112,10 +122,108 @@ public class SQLUtils {
     }
 
     public static void loggingQuery(SQLTimerModel timer, String sql) {
-        logger.info("QUERY EXECUTED: " + sql + ". Was executed in " + timer.stop() + " ms.");
+        if (SQLAnnotation.getConfig() != null && SQLAnnotation.getConfig().isLog()) {
+            logger.info("QUERY EXECUTED: " + sql + ". Was executed in " + timer.stop() + " ms.");
+        }
     }
 
-    private static List<Object> loadJoinEntity(SelectJoinModel joinModel, JSONObject values) {
+    public static Object convertValue(Object rawValue, Class<?> targetType) {
+        if (rawValue == null) {
+            if (targetType == boolean.class) return false;
+            if (targetType == int.class) return 0;
+            if (targetType == long.class) return 0L;
+            if (targetType == double.class) return 0.0d;
+            if (targetType == float.class) return 0.0f;
+            if (targetType == short.class) return (short) 0;
+            if (targetType == byte.class) return (byte) 0;
+            return null;
+        }
+
+        if (targetType.isInstance(rawValue)) {
+            return rawValue;
+        }
+
+        if (targetType == Long.class || targetType == long.class) {
+            if (rawValue instanceof Number) return ((Number) rawValue).longValue();
+            return Long.parseLong(rawValue.toString());
+        }
+
+        if (targetType == Integer.class || targetType == int.class) {
+            if (rawValue instanceof Number) return ((Number) rawValue).intValue();
+            return Integer.parseInt(rawValue.toString());
+        }
+
+        if (targetType == Double.class || targetType == double.class) {
+            if (rawValue instanceof Number) return ((Number) rawValue).doubleValue();
+            return Double.parseDouble(rawValue.toString());
+        }
+
+        if (targetType == Float.class || targetType == float.class) {
+            if (rawValue instanceof Number) return ((Number) rawValue).floatValue();
+            return Float.parseFloat(rawValue.toString());
+        }
+
+        if (targetType == Short.class || targetType == short.class) {
+            if (rawValue instanceof Number) return ((Number) rawValue).shortValue();
+            return Short.parseShort(rawValue.toString());
+        }
+
+        if (targetType == Byte.class || targetType == byte.class) {
+            if (rawValue instanceof Number) return ((Number) rawValue).byteValue();
+            return Byte.parseByte(rawValue.toString());
+        }
+
+        if (targetType == Boolean.class || targetType == boolean.class) {
+            if (rawValue instanceof Boolean) return rawValue;
+            if (rawValue instanceof Number) return ((Number) rawValue).intValue() != 0;
+            return Boolean.parseBoolean(rawValue.toString());
+        }
+
+        if (targetType == UUID.class) {
+            if (rawValue instanceof UUID) return rawValue;
+            return UUID.fromString(rawValue.toString());
+        }
+
+        if (targetType == BigDecimal.class) {
+            if (rawValue instanceof BigDecimal) return rawValue;
+            if (rawValue instanceof Number) return BigDecimal.valueOf(((Number) rawValue).doubleValue());
+            return new BigDecimal(rawValue.toString());
+        }
+
+        if (targetType == BigInteger.class) {
+            if (rawValue instanceof BigInteger) return rawValue;
+            if (rawValue instanceof Number) return BigInteger.valueOf(((Number) rawValue).longValue());
+            return new BigInteger(rawValue.toString());
+        }
+
+        if (targetType == LocalDateTime.class) {
+            if (rawValue instanceof Timestamp) return ((Timestamp) rawValue).toLocalDateTime();
+            if (rawValue instanceof java.util.Date) return new Timestamp(((java.util.Date) rawValue).getTime()).toLocalDateTime();
+        }
+
+        if (targetType == LocalDate.class) {
+            if (rawValue instanceof java.sql.Date) return ((java.sql.Date) rawValue).toLocalDate();
+            if (rawValue instanceof Timestamp) return ((Timestamp) rawValue).toLocalDateTime().toLocalDate();
+        }
+
+        if (targetType == LocalTime.class) {
+            if (rawValue instanceof java.sql.Time) return ((java.sql.Time) rawValue).toLocalTime();
+            if (rawValue instanceof Timestamp) return ((Timestamp) rawValue).toLocalDateTime().toLocalTime();
+        }
+
+        if (targetType == Instant.class) {
+            if (rawValue instanceof Timestamp) return ((Timestamp) rawValue).toInstant();
+            if (rawValue instanceof java.util.Date) return ((java.util.Date) rawValue).toInstant();
+        }
+
+        if (targetType == String.class) {
+            return rawValue.toString();
+        }
+
+        return rawValue;
+    }
+
+    private static List<Object> loadJoinEntity(SelectJoinModel joinModel, Map<String, Object> values) {
         if (joinModel == null) return null;
         List<Object> entities = new ArrayList<>();
         try {
@@ -125,10 +233,10 @@ public class SQLUtils {
                 Object entity = constructor.newInstance();
                 for (Field field : SQLUtils.listFieldColumns(entityClass, false)) {
                     String columnName = joinModel.getTableReference(entityClass) + "_" + field.getName();
-                    if (!values.keySet().contains(columnName)) continue;
+                    if (!values.containsKey(columnName)) continue;
 
                     field.setAccessible(true);
-                    field.set(entity, values.get(columnName));
+                    field.set(entity, convertValue(values.get(columnName), field.getType()));
                 }
 
                 entities.add(entity);
